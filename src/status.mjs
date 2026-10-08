@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {detect} from './core.mjs';
 import {SKILL_CATALOG} from './skill-catalog.mjs';
+import {detectHeadroom} from './headroom-status.mjs';
 
 function readText(file) {
   try {
@@ -78,6 +79,7 @@ export function inspect(options={}) {
       exists(path.join(home,'.agents','skills',id,'SKILL.md'));
     plugins[id]={claudeInstalled,claudeEnabled,codexConfigured};
   }
+  const headroom=detectHeadroom({found:sys.found,uvToolList:options.uvToolList,uvPath:options.uvPath,execute:options.uvExecute});
   return {
     system: sys,
     configs:{
@@ -98,11 +100,13 @@ export function inspect(options={}) {
     },
     tools:{
       rtk:{installed:!!sys.found.rtk,details:'Cần kiểm tra hook riêng trong phần cấu hình'},
-      headroom:{installed:!!sys.found.headroom,details:'Chỉ hoạt động khi chạy qua BOLT-CLAUDE / BOLT-CODEX'},
-      caveman:{installed:plugins.caveman.claudeInstalled||plugins.caveman.codexConfigured,
-        details:plugins.caveman.claudeEnabled?'Claude: plugin bật':'Cần xác minh plugin/skill trong agent'},
-      ponytail:{installed:plugins.ponytail.claudeInstalled||plugins.ponytail.codexConfigured,
-        details:plugins.ponytail.claudeEnabled?'Claude: plugin bật':'Cần xác minh plugin/skill trong agent'},
+      headroom,
+      caveman:{installed:skillStates.caveman.claude.installed||skillStates.caveman.codex.installed,
+        configured:plugins.caveman.claudeEnabled,
+        details:plugins.caveman.claudeEnabled?'Plugin được bật theo settings Claude; cài đặt thực tế cần xác minh trong plugin registry.':'Chưa xác minh; kiểm tra Claude plugin list hoặc skill.'},
+      ponytail:{installed:skillStates.ponytail.claude.installed||skillStates.ponytail.codex.installed,
+        configured:plugins.ponytail.claudeEnabled,
+        details:plugins.ponytail.claudeEnabled?'Plugin được bật theo settings Claude; kiểm tra plugin registry để xác minh cài đặt.':'Chưa xác minh; kiểm tra Claude plugin list hoặc skill.'},
     },
     plugins,
     skillStates

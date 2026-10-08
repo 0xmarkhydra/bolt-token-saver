@@ -20,7 +20,32 @@ AI có quyền dùng terminal (Claude Code/Codex CLI/CodeLocal) có thể thực
 
 Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
 
-**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.2
+**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.3
+
+## 🔎 Khắc phục trường hợp Headroom / Caveman vẫn màu vàng (v0.5.3)
+
+Mục **Công cụ tối ưu** là trạng thái nhận diện, không phải xác nhận tool đang hoạt động.
+
+- **Headroom**: chương trình tìm lệnh `headroom` trong PATH **và** kiểm tra
+  `uv tool list` (chỉ đọc). Nếu đã cài qua uv nhưng VS Code chưa nhận PATH,
+  Dashboard có thể hiện **✓ Đã nhận diện cài đặt**, đồng thời nhắc chạy
+  `uv tool update-shell` rồi mở lại terminal/VS Code. Headroom vẫn cần
+  chạy qua `BOLT-CLAUDE.cmd` / `BOLT-CODEX.cmd` để proxy được sử dụng.
+- **Caveman**: tìm trong `installed_plugins.json`, đường dẫn SKILL.md
+  của Claude/Codex và trạng thái `enabledPlugins` của Claude.
+  Nếu chỉ thấy cờ bật nhưng chưa thấy plugin thực sự, màu vàng sẽ ghi
+  **◐ Đã bật theo config · Chưa xác minh cài** (không đánh dấu xanh giả).
+
+Để tự kiểm tra trên Windows PowerShell, sau khi đóng TUI:
+
+```powershell
+claude plugin list
+uv tool list
+Get-Command headroom -ErrorAction SilentlyContinue
+```
+
+Nếu `uv` không tồn tại, lệnh tương ứng sẽ báo không tìm thấy; khi đó **chưa đủ bằng chứng** rằng Headroom đã được cài.
+Đừng cài lại khi chưa kiểm tra danh sách plugin/uv. Không đưa API key hoặc endpoint riêng tư vào ảnh chụp màn hình.
 
 ## 🪟 Windows: RTK không cần WinGet (v0.5.1)
 

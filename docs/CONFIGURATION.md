@@ -1,6 +1,6 @@
 # Config discovery and privacy rules
 
-This document describes the **implemented v0.5.2** read-only configuration screen. Optional skills from [SKILL-CATALOG.md](SKILL-CATALOG.md) are not yet auto-detected as installed/enabled/working. It does **not** claim that tools are functioning end-to-end.
+This document describes the **implemented v0.5.3** read-only configuration screen. Optional skills from [SKILL-CATALOG.md](SKILL-CATALOG.md) are not yet auto-detected as installed/enabled/working. It does **not** claim that tools are functioning end-to-end.
 
 ## Sources inspected
 
@@ -8,6 +8,10 @@ This document describes the **implemented v0.5.2** read-only configuration scree
 |---|---|---|
 | Claude Code | `$CLAUDE_CONFIG_DIR/settings.json` or `~/.claude/settings.json`; `~/.claude/plugins/installed_plugins.json` (under configured Claude dir) | config exists, sanitized model, custom endpoint **yes/no**, credential detected **yes/no**, RTK hook indication, plugin indicators |
 | Codex | `$CODEX_HOME/config.toml` or `~/.codex/config.toml`; `hooks.json` | config exists, top-level model, endpoint **yes/no**, API key env present **yes/no**, RTK hook indication, skill/plugin indications |
+
+Headroom detection also runs a bounded, read-only `uv tool list` when uv is available. It parses only the `headroom-ai` package marker and never returns or prints raw tool output. If uv has Headroom installed but the command is missing from PATH, it is labeled **installed**, with a warning about `uv tool update-shell`. No proxy is started, and the status is never **working**.
+
+Caveman and Ponytail detection distinguish actual plugin/skill file evidence from an `enabledPlugins` configuration flag. A flag by itself is **configured only**: it must not be reported as a verified installation.
 
 The tool also checks the known skill paths `~/.codex/skills/<tool>/SKILL.md` and `~/.agents/skills/<tool>/SKILL.md`. Presence is **not equivalent to active support**.
 

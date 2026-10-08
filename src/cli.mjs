@@ -5,7 +5,7 @@ import {inspect} from './status.mjs';
 import {backup} from './backup.mjs';
 import {SKILL_CATALOG, skillUrl, planSkill} from './skill-catalog.mjs';
 
-const VERSION='0.5.2';
+const VERSION='0.5.3';
 const args=process.argv.slice(2);
 const tty=!!(process.stdin.isTTY&&process.stdout.isTTY);
 const tint=(s,n)=>tty?'\x1b['+n+'m'+s+'\x1b[0m':s;
@@ -35,7 +35,9 @@ function header(title,subtitle=''){
 }
 function detectionLabel(found){return found?good('✓ Đã nhận diện'):warn('○ Chưa tìm thấy');}
 function statusLabel(tool){
-  return tool.installed?good('✓ Có dấu hiệu đã cài'):warn('○ Chưa xác nhận cài đặt');
+  if(tool.installed)return good('✓ Đã nhận diện cài đặt');
+  if(tool.configured)return warn('◐ Đã bật theo config · Chưa xác minh cài');
+  return warn('○ Chưa xác nhận cài đặt');
 }
 function skillStatusText(state){
   if(!state||!state.installed)return warn('○ Chưa xác minh');
@@ -48,7 +50,11 @@ function doctor(){
   const s=inspect();
   line('Bolt Token Saver v'+VERSION+' | '+s.system.os+' '+s.system.arch);
   for(const a of AGENTS)line(a.name.padEnd(14)+(s.system.found[a.bin]?'FOUND':'not found'));
-  for(const t of TOOLS)line(t.name.padEnd(14)+(s.tools[t.id].installed?'detected':'not verified'));
+  for(const t of TOOLS){
+    const status=s.tools[t.id];
+    line(t.name.padEnd(14)+(status.installed?'detected':status.configured?'configured only':'not verified'));
+    if(t.id==='headroom'&&status.uvRegistered&&!status.available)line('Headroom uv: installed; CLI not on PATH (uv tool update-shell).');
+  }
   line('Configuration: '+(s.configs.claude.filePresent?'Claude settings found; ':'')+(s.configs.codex.filePresent?'Codex config found':''));
 }
 if(args.includes('--version')){line(VERSION);process.exit(0);}
@@ -161,6 +167,8 @@ async function dashboard(){
     line('\n CÔNG CỤ TỐI ƯU');
     for(const t of TOOLS){
       line('   '+t.name.padEnd(15)+' '+statusLabel(s.tools[t.id]));
+      if(t.id==='headroom'&&s.tools.headroom.uvRegistered&&!s.tools.headroom.available)
+        line('      '+tint('Đã cài qua uv, nhưng terminal chưa nhận lệnh',90));
     }
     const installedSkills=SKILL_CATALOG.filter(x=>x.type!=='core'&&s.skillStates[x.id]?.installed);
     if(installedSkills.length){
@@ -210,7 +218,11 @@ async function configScreen(){
     line();
   }
   line(strong(' CÔNG CỤ CÀI ĐẶT TRÊN MÁY'));
-  for(const t of TOOLS)line('   '+t.name.padEnd(13)+(s.tools[t.id].installed?'Đã nhận diện / tìm thấy cấu hình':'Chưa xác minh'));
+  for(const t of TOOLS){
+    const tool=s.tools[t.id];
+    line('   '+t.name.padEnd(13)+statusLabel(tool));
+    if(t.id==='headroom')line('      '+tint(tool.details,90));
+  }
   line('\n '+strong(' AI SKILLS MỞ RỘNG'));
   for(const skill of SKILL_CATALOG.filter(x=>x.type!=='core'&&x.type!=='collection')){
     line('   '+skill.name.padEnd(19)+skillStatusText(s.skillStates[skill.id]));
