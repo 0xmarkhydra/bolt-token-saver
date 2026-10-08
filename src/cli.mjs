@@ -5,7 +5,7 @@ import {inspect} from './status.mjs';
 import {backup} from './backup.mjs';
 import {SKILL_CATALOG, skillUrl, planSkill} from './skill-catalog.mjs';
 
-const VERSION='0.5.0';
+const VERSION='0.5.1';
 const args=process.argv.slice(2);
 const tty=!!(process.stdin.isTTY&&process.stdout.isTTY);
 const tint=(s,n)=>tty?'\x1b['+n+'m'+s+'\x1b[0m':s;

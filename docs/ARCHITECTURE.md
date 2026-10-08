@@ -6,6 +6,7 @@
 - Terminal output uses ANSI styling; keyboard input uses Node's built-in `readline`.
 - `package.json` exposes the CLI through `bin.bolt-token-saver = ./src/cli.mjs`.
 - `src/skill-catalog.mjs` maps 10 optional skills to allowlisted install plans, agent compatibility and manual instructions.
+- `src/install-rtk-windows.mjs` implements a WinGet-free Windows x64 RTK install from the official SHA-256-verified GitHub release; writes only the user's executable directory and User PATH after consent.
 - Works locally via scripts or from GitHub through `npx -y github:0xmarkhydra/bolt-token-saver` (requires Node + Git).
 
 ## Runtime flow

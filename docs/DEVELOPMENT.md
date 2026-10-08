@@ -46,6 +46,18 @@ Add an upstream command only after confirming its exact supported CLI flags. Moc
 5. Update README/relevant docs when the user-facing behavior changed.
 6. Review diff and commit with a descriptive message. Push only when authorized.
 
+## Windows RTK fallback
+
+When WinGet is absent on Windows x64, `plan()` uses
+`src/install-rtk-windows.mjs` via the current Node executable.
+That script fetches the official `rtk-ai/rtk` latest release,
+checks the GitHub-provided SHA-256 digest, extracts the Windows `rtk.exe`,
+and adds `~/.local/bin` to the **User PATH** (not system PATH).
+`execStep()` resolves known executable paths so RTK initialization can
+run immediately without waiting for the current terminal to refresh PATH.
+This path is **not supported on ARM64**. Unit tests simulate planning and
+integrity checks but do not install anything on Windows.
+
 ## Troubleshooting developer environment
 
 - `npx ...` not found: install Node.js 20+.

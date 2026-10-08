@@ -21,6 +21,7 @@ It helps nontechnical users install/configure RTK, Headroom, Caveman and Ponytai
 - `src/status.mjs` — **read-only** configuration/status inspection with strict redaction.
 - `src/backup.mjs` — backup of existing user agent configurations before changes.
 - `src/skill-catalog.mjs` — allowlisted optional skill catalog and per-agent install plan; **no auto-installs**.
+- `src/install-rtk-windows.mjs` — Windows x64 RTK fallback through official GitHub Release and SHA-256 verification, user PATH only.
 - `test/*.test.mjs` — Node built-in test runner.
 - `RUN-WINDOWS.cmd`, `run-macos-linux.sh` — local launchers.
 - `BOLT-CLAUDE.cmd`, `BOLT-CODEX.cmd`, `bolt-claude.sh`, `bolt-codex.sh` — Headroom-specific wrappers.

@@ -55,6 +55,15 @@ npx -y github:0xmarkhydra/bolt-token-saver --plan
 
 npm 12 may report \`EALLOWGIT\`. Only for a reviewed/trusted repository, try \`npx --allow-git=root -y github:0xmarkhydra/bolt-token-saver ...\`. On Windows PowerShell, use \`npx.cmd\` rather than \`npx\` when script execution policy blocks the \`.ps1\` shim.
 
+### Windows RTK without WinGet
+
+For Windows x64, Bolt Token Saver v0.5.1+ automatically falls back to
+the official RTK GitHub Release if WinGet is unavailable, validates its
+SHA-256, and updates the current user's PATH. Show this path to the user
+at confirmation; do not ask them to install an unrelated package manager.
+Restart the terminal after installation. Windows ARM64 and managed
+PowerShell policies may still require manual intervention.
+
 ### Recommended interactive installation
 
 From an authorized real terminal / PTY:

@@ -20,7 +20,21 @@ AI có quyền dùng terminal (Claude Code/Codex CLI/CodeLocal) có thể thực
 
 Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
 
-**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.0
+**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.1
+
+## 🪟 Windows: RTK không cần WinGet (v0.5.1)
+
+Nếu chương trình báo **`Missing: winget`** khi cài RTK, hãy dùng phiên bản mới rồi chọn lại RTK.
+Trên Windows x64, Bolt Token Saver có đường cài dự phòng không cần WinGet: tải
+`rtk-x86_64-pc-windows-msvc.zip` từ **GitHub Releases chính thức** của
+`rtk-ai/rtk`, xác minh **SHA-256** theo GitHub Release API, giải nén
+`rtk.exe` vào `%USERPROFILE%\.local\bin`, và thêm thư mục này vào **User PATH**
+(không cần quyền Administrator). Đóng/mở lại terminal sau cài.
+
+Nếu máy sử dụng **Windows ARM64**, đường cài dự phòng x64 không chạy; hãy
+kiểm tra tùy chọn chính thức từ [RTK Releases](https://github.com/rtk-ai/rtk/releases).
+Nếu Windows PowerShell hoặc cập nhật User PATH bị chặn bởi chính sách công ty,
+chương trình sẽ báo lỗi; không tự thay đổi chính sách bảo mật.
 
 ## 🚀 Chạy bằng một lệnh
 

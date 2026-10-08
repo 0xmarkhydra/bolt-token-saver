@@ -1,6 +1,6 @@
 {
   "name": "bolt-token-saver",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "type": "module",
   "description": "Interactive terminal installer for token-saving AI coding agents",
@@ -12,7 +12,7 @@
     "doctor": "node src/cli.mjs --doctor",
     "plan": "node src/cli.mjs --plan",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check src/cli.mjs && node --check src/core.mjs && node --check src/backup.mjs && node --check src/status.mjs && node --check src/skill-catalog.mjs && npm test"
+    "check": "node --check src/cli.mjs && node --check src/core.mjs && node --check src/backup.mjs && node --check src/status.mjs && node --check src/skill-catalog.mjs && node --check src/install-rtk-windows.mjs && npm test"
   },
   "engines": {
     "node": ">=20"

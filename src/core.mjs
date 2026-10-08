@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import { spawn } from 'node:child_process';
 
 export const AGENTS = [
@@ -32,7 +33,7 @@ export function which(bin) {
   return null;
 }
 export function detect(){
-  const found=Object.fromEntries(['claude','codex','rtk','headroom','npm','npx','git','uv','winget','brew','cargo'].map(x=>[x,!!which(x)]));
+  const found=Object.fromEntries(['claude','codex','rtk','headroom','npm','npx','git','uv','uvx','winget','brew','cargo'].map(x=>[x,!!which(x)]));
   return { os:({win32:'Windows',darwin:'macOS',linux:'Linux'})[process.platform]||process.platform,platform:process.platform,arch:process.arch,found };
 }
 const step=(name,cmd,args,opts={})=>({name,cmd,args,...opts});
@@ -48,7 +49,14 @@ export function plan({agents,tools,system=detect()}){
   }
   if(tools.includes('rtk')){
     if(!found.rtk){
-      if(platform==='win32') steps.push(step('Install RTK','winget',['install','--id','rtk-ai.rtk','--exact','--accept-package-agreements','--accept-source-agreements'],{needs:['winget'],skip:'rtk'}));
+      if(platform==='win32'){
+        if(found.winget)steps.push(step('Install RTK','winget',['install','--id','rtk-ai.rtk','--exact','--accept-package-agreements','--accept-source-agreements'],{needs:['winget'],skip:'rtk'}));
+        else if((system.arch||process.arch)==='x64'){
+          steps.push(step('Install RTK (official Windows release; no WinGet)',process.execPath,[fileURLToPath(new URL('./install-rtk-windows.mjs',import.meta.url))],{skip:'rtk'}));
+          warnings.push('RTK will download the official GitHub release, verify SHA-256, and add ~/.local/bin to your Windows user PATH (no admin).');
+        }
+        else warnings.push('RTK WinGet fallback currently supports only Windows x64; install from the official release manually.');
+      }
       else if(found.brew)steps.push(step('Install RTK','brew',['install','rtk-ai/tap/rtk'],{needs:['brew'],skip:'rtk'}));
       else if(found.cargo)steps.push(step('Install RTK','cargo',['install','--git','https://github.com/rtk-ai/rtk','rtk'],{needs:['cargo'],skip:'rtk'}));
       else warnings.push('RTK requires WinGet, Homebrew or Rust Cargo.');
@@ -96,7 +104,9 @@ export function printStep(s){return [s.cmd,...s.args.map(x=>/\s/.test(x)?JSON.st
 export function execStep(s,onOutput=()=>{}){
   return new Promise((resolve,reject)=>{
     // Only allowlisted command names/arguments reach the shell (Windows .cmd shims).
-    const child=spawn(s.cmd,s.args,{shell:process.platform==='win32',windowsHide:true,env:{...process.env,FORCE_COLOR:'0'},stdio:['ignore','pipe','pipe']});
+    const resolved=which(s.cmd)||s.cmd;
+    const needsShell=process.platform==='win32'&&/\.(cmd|bat)$/i.test(resolved);
+    const child=spawn(resolved,s.args,{shell:needsShell,windowsHide:true,env:{...process.env,FORCE_COLOR:'0'},stdio:['ignore','pipe','pipe']});
     child.stdout?.on('data',b=>onOutput(b.toString()));
     child.stderr?.on('data',b=>onOutput(b.toString()));
     child.on('error',reject);
