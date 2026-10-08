@@ -20,7 +20,7 @@ AI có quyền dùng terminal (Claude Code/Codex CLI/CodeLocal) có thể thực
 
 Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
 
-**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.4.0
+**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.0
 
 ## 🚀 Chạy bằng một lệnh
 
@@ -35,11 +35,11 @@ npx -y github:0xmarkhydra/bolt-token-saver
 - Không muốn dùng Git CLI: tải ZIP repo, giải nén, chạy `RUN-WINDOWS.cmd` (Windows) hoặc `bash run-macos-linux.sh` (macOS/Linux). Trên Windows, file CMD có thể đề nghị cài Node LTS qua WinGet.
 - **Chưa xuất bản lên npm registry**: hiện chưa thể dùng `npx bolt-token-saver` trực tiếp.
 
-## ✨ Giao diện v0.4
+## ✨ Giao diện v0.5
 
 ```text
 ╭───────────────────────────────────────────────────╮
-│ ⚡ BOLT TOKEN SAVER · v0.4.0                     │
+│ ⚡ BOLT TOKEN SAVER · v0.5.0                     │
 ╰───────────────────────────────────────────────────╯
  BẢNG ĐIỀU KHIỂN — Windows / macOS / Linux
 
@@ -55,9 +55,10 @@ npx -y github:0xmarkhydra/bolt-token-saver
 
  BẠN MUỐN LÀM GÌ?
  ❯ 1. Cài đặt tối ưu token
-   2. Xem trạng thái & cấu hình
-   3. Hướng dẫn sử dụng
-   4. Thoát
+   2. Khám phá & cài thêm AI Skills
+   3. Xem trạng thái & cấu hình
+   4. Hướng dẫn sử dụng
+   5. Thoát
 
  ↑ ↓ Di chuyển     Enter Chọn     Q Thoát
 ```
@@ -72,7 +73,7 @@ npx -y github:0xmarkhydra/bolt-token-saver
 
 **Không tự cài khi chỉ mở TUI hoặc khi đang xem cấu hình.**
 
-### 2. Xem trạng thái & cấu hình
+### 3. Xem trạng thái & cấu hình
 
 Màn hình chỉ đọc, gồm:
 
@@ -85,9 +86,23 @@ Màn hình chỉ đọc, gồm:
 
 Đây là **phát hiện bằng CLI và tệp cấu hình**, không phải kiểm tra live rằng hook hoạt động hay lượng token đã giảm. Headroom chỉ chạy khi bạn dùng launcher riêng.
 
-### 3. Hướng dẫn sử dụng
+### 4. Hướng dẫn sử dụng
 
 Phím tắt: **↑/↓** di chuyển, **Space** tích/bỏ chọn, **Enter** tiếp tục, **Esc** quay lại, **Q** thoát.
+
+### 2. Khám phá & cài thêm AI Skills
+
+Gồm **10 dự án trong bảng xếp hạng**, hiển thị thành hai trang (mỗi trang 5 dự án).
+Chọn một mục để xem tác dụng, Claude/Codex có hỗ trợ không, nguồn GitHub và cảnh báo trước khi chọn cài.
+
+- **Ponytail, Caveman**: đã ở mục tối ưu token, không cài lại từ catalog.
+- **Awesome Claude Skills**: chỉ là danh sách tổng hợp, không tự cài cả thư viện.
+- **Superpowers và Understand Anything trên Codex**: hướng dẫn cài thủ công từ phương thức chính thức; không tự chạy shell script từ mạng.
+- Những skill còn lại: có kế hoạch cài riêng theo agent được chọn, luôn xác nhận trước khi chạy.
+
+Các skill mở rộng **không được chọn mặc định**; thêm skill không đồng nghĩa giảm token.
+
+[**Xem bảng 10 repo, khả năng tương thích và các giới hạn →**](docs/SKILL-CATALOG.md)
 
 ## Công cụ
 
@@ -128,6 +143,7 @@ Bạn có thể giao repository này cho AI để **đọc hiểu dự án, sử
 - [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) — kiến trúc và vị trí sửa từng thành phần.
 - [**docs/CONFIGURATION.md**](docs/CONFIGURATION.md) — cách đọc config Claude/Codex và giới hạn bảo mật.
 - [**docs/DEVELOPMENT.md**](docs/DEVELOPMENT.md) — chạy, kiểm thử và debug.
+- [**docs/SKILL-CATALOG.md**](docs/SKILL-CATALOG.md) — 10 skill trong ảnh, cách cài theo agent và giới hạn.
 - [**docs/FEATURE-SPEC-TEMPLATE.md**](docs/FEATURE-SPEC-TEMPLATE.md) — mẫu tài liệu tính năng để yêu cầu AI làm đúng phạm vi.
 
 **Cách nhanh nhất:** mở repo trong Codex hoặc Claude Code rồi gửi:

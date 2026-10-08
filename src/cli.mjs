@@ -3,8 +3,9 @@ import readline from 'node:readline';
 import {AGENTS, TOOLS, detect, plan, run, printStep} from './core.mjs';
 import {inspect} from './status.mjs';
 import {backup} from './backup.mjs';
+import {SKILL_CATALOG, skillUrl, planSkill} from './skill-catalog.mjs';
 
-const VERSION='0.4.0';
+const VERSION='0.5.0';
 const args=process.argv.slice(2);
 const tty=!!(process.stdin.isTTY&&process.stdout.isTTY);
 const tint=(s,n)=>tty?'\x1b['+n+'m'+s+'\x1b[0m':s;
@@ -141,9 +142,10 @@ async function dashboard(){
   const s=inspect();
   const options=[
     {id:'setup',name:'1. Cài đặt tối ưu token',description:'Được hướng dẫn chọn Claude/Codex và công cụ phù hợp'},
-    {id:'config',name:'2. Xem trạng thái & cấu hình',description:'Chỉ xem; tự động ẩn khóa API và endpoint'},
-    {id:'help',name:'3. Hướng dẫn sử dụng',description:'Phím bấm, quyền truy cập và cách chạy AI'},
-    {id:'quit',name:'4. Thoát'}
+    {id:'catalog',name:'2. Khám phá & cài thêm AI Skills',description:'10 dự án nổi bật — chỉ cài khi bạn chọn'},
+    {id:'config',name:'3. Xem trạng thái & cấu hình',description:'Chỉ xem; tự động ẩn khóa API và endpoint'},
+    {id:'help',name:'4. Hướng dẫn sử dụng',description:'Phím bấm, quyền truy cập và cách chạy AI'},
+    {id:'quit',name:'5. Thoát'}
   ];
   let cursor=0;
   const render=()=>{
@@ -167,7 +169,7 @@ async function dashboard(){
     else if(key.name==='down'||str==='j'){cursor=(cursor+1)%options.length;render();}
     else if(key.name==='return')finish(options[cursor].id);
     else if(key.name==='escape'||str==='q'||str==='Q')finish('quit');
-    else if('1234'.includes(str)&&str?.length===1)finish(options[Number(str)-1].id);
+    else if('12345'.includes(str)&&str?.length===1)finish(options[Number(str)-1].id);
   });
 }
 async function configScreen(){
@@ -205,9 +207,11 @@ async function helpScreen(){
     ' 1. Chọn "Cài đặt tối ưu token" ở trang chủ.',
     ' 2. Chọn Claude Code, Codex hoặc cả hai.',
     ' 3. Mặc định RTK + Ponytail. Có thể chọn thêm 2 công cụ còn lại.',
-    ' 4. Xem bản tóm tắt; nhấn X để xem các lệnh chi tiết.',
+    ' 4. Xem bản tóm tắt; nhấn D để xem các lệnh chi tiết.',
     ' 5. Chỉ khi đồng ý, chương trình mới tải/cài các công cụ.',
     ' 6. Khởi động lại Claude/Codex sau khi cài.',
+    ' 7. Mục AI Skills là công cụ mở rộng, KHÔNG tự tiết kiệm token.',
+    '    Superpowers, UI/UX, Graphify, Addy Skills và các skill khác là tùy chọn.',
     '',
     ' PHÍM BẤM',
     ' ↑↓: di chuyển     Space: chọn/bỏ chọn',
@@ -219,12 +223,12 @@ async function helpScreen(){
   ].forEach(line);
   return waitBack();
 }
-async function confirmSetup(p){
+async function confirmSetup(p,{agentIds=[...selectedAgents],label=[...selectedTools].map(x=>toolNames[x]).join(', ')}={}){
   let yes=false,showDetail=false;
   const render=()=>{
     clear();header('XÁC NHẬN TRƯỚC KHI CÀI','Không thay đổi hệ thống cho đến khi bạn đồng ý');
-    line(' Agent:    '+[...selectedAgents].map(x=>agentNames[x]).join(', '));
-    line(' Công cụ:  '+[...selectedTools].map(x=>toolNames[x]).join(', '));
+    line(' Agent:    '+agentIds.map(x=>agentNames[x]).join(', '));
+    line(' Công cụ:  '+label);
     line('\n SẮP THỰC HIỆN');
     line(' ✓ Tạo bản sao dự phòng cấu hình hiện tại (nếu có)');
     line(' ✓ Cài plugin / tool từ nhà phát triển tương ứng');
@@ -237,6 +241,7 @@ async function confirmSetup(p){
       }
     }
     for(const w of p.warnings)line(' '+warn('! '+w));
+    for(const n of p.notes||[])line(' '+tint('• '+n,90));
     line('\n '+(yes?good('❯ [ĐỒNG Ý] Bắt đầu cài'):'  [ĐỒNG Ý] Bắt đầu cài'));
     line(' '+(!yes?accent('❯ [QUAY LẠI] Chỉnh lựa chọn'):'  [QUAY LẠI] Chỉnh lựa chọn'));
     line('\n '+accent('↑ ↓')+' Chọn  '+accent('Enter')+' Xác nhận  '+accent('D')+' Chi tiết  '+accent('Esc')+' Quay lại');
@@ -255,12 +260,12 @@ function sanitizeOutput(input){
   return input.replace(/\b(?:sk-[A-Za-z0-9_-]{10,}|gh[pousr]_[A-Za-z0-9_]{12,})\b/g,'[ĐÃ ẨN]')
     .replace(/((?:api[_-]?key|auth(?:orization)?|secret|token)\s*[:=]\s*)\S+/gi,'$1[ĐÃ ẨN]');
 }
-async function installScreen(p){
+async function installScreen(p,{agentIds=[...selectedAgents],showHeadroom=true}={}){
   clear();header('ĐANG CÀI ĐẶT','Quá trình có thể yêu cầu xác nhận quyền từ hệ điều hành');
   process.stdin.setRawMode(false);
   let summary;
   try {
-    const saved=backup([...selectedAgents]);
+    const saved=backup(agentIds);
     line(saved.directory?' ✓ Đã backup: '+saved.directory:' • Không có tệp cấu hình cần backup');
     summary=await run(p,{
       onState:(s,status)=>line(' '+(status==='ok'?good('✓'):status==='running'?accent('→'):warn('!'))+' '+s.name+': '+status),
@@ -276,9 +281,10 @@ async function installScreen(p){
   line(' '+good(ok+' bước hoàn tất hoặc đã có sẵn')+', '+(incomplete.length?warn(incomplete.length+' bước cần xử lý'):good('không có lỗi được báo')));
   for(const x of incomplete)line(' ! '+x.name+' — '+x.status+(x.message?': '+x.message:''));
   line('\n Khởi động lại Claude/Codex để các tích hợp mới có hiệu lực.');
-  if(selectedTools.has('headroom')){
+  if(showHeadroom&&selectedTools.has('headroom')){
     line(' Headroom: dùng BOLT-CLAUDE / BOLT-CODEX launcher thay vì chạy agent trực tiếp.');
   }
+  for(const note of p.notes||[])line(' • '+note);
   line(' Bạn có thể quay về trang chủ để kiểm tra lại cấu hình.');
   return waitBack();
 }
@@ -309,6 +315,90 @@ async function setupWizard(){
     }
   }
 }
+async function skillCatalogScreen(){
+  const pageSize=5;
+  let page=0;
+  for(;;){
+    const from=page*pageSize;
+    const chosen=await menu({
+      title:'THƯ VIỆN AI SKILLS — TOP 10',
+      subtitle:'Trang '+(page+1)+'/2 · Mở rộng khả năng AI, không nhất thiết tiết kiệm token',
+      options:[
+        ...SKILL_CATALOG.slice(from,from+pageSize).map((s,i)=>({
+          id:s.id,name:String(from+i+1).padStart(2)+'. '+s.name,
+          detail:s.type==='core'?good('· Đã tích hợp'):s.type==='collection'?warn('· Chỉ tham khảo'):'',
+          description:s.about
+        })),
+        ...(page>0?[{id:'previous',name:'← 5 skill trước'}]:[]),
+        ...(from+pageSize<SKILL_CATALOG.length?[{id:'next',name:'→ Xem 5 skill tiếp'}]:[]),
+        {id:'back',name:'← Trở về trang chủ'}
+      ],
+      footer:()=>line('\n '+accent('↑ ↓')+' Di chuyển  '+accent('Enter')+' Xem  '+accent('Esc')+' Về trang chủ  '+accent('Q')+' Thoát')
+    });
+    if(chosen==='quit')return 'quit';
+    if(chosen==='back')return 'back';
+    if(chosen==='next'){page++;continue;}
+    if(chosen==='previous'){page--;continue;}
+    const skill=SKILL_CATALOG.find(x=>x.id===chosen);
+    if(!skill)continue;
+    const possible=skill.automated.length>0;
+    const show=()=>{
+      clear();header(skill.name.toUpperCase(),'Danh mục mở rộng · Không tự động cài đặt');
+      line(' '+skill.about);
+      line(' Loại: '+(skill.type==='collection'?'Danh sách tham khảo':skill.type==='core'?'Đã nằm trong bộ tối ưu':skill.type==='plugin'?'Plugin':'AI Skill'));
+      line(' Nguồn: '+accent(skillUrl(skill)));
+      line(' Hỗ trợ: '+skill.agents.map(a=>agentNames[a]).join(' + '));
+      line(' Cài trực tiếp: '+(possible?skill.automated.map(a=>agentNames[a]).join(', '):'Không ở mục này'));
+      if(skill.note)line('\n '+warn(' Lưu ý: ')+skill.note);
+      if(skill.risk)line(' '+warn(' Cảnh báo: ')+skill.risk);
+      line('\n '+tint('Không phải công cụ tiết kiệm token; một số skill có thể tăng',90));
+      line(tint('sử dụng token khi phân tích code hoặc chạy nhiều bước.',90));
+      if(possible)line('\n '+accent('Enter / I')+' Chọn agent rồi xem lệnh cài');
+      else line('\n '+accent('Enter')+' Quay lại danh sách (xem nguồn để biết thêm)');
+      line(' '+accent('Esc')+' Quay lại  '+accent('Q')+' Thoát');
+    };
+    const decision=await listen(show,(str,key,finish)=>{
+      if(key.name==='escape')finish('back');
+      else if(str==='q'||str==='Q')finish('quit');
+      else if(key.name==='return'||str==='i'||str==='I')finish(possible?'install':'back');
+    });
+    if(decision==='quit')return 'quit';
+    if(decision==='back')continue;
+    const fresh=detect();
+    const selected=new Set([...selectedAgents].filter(a=>skill.agents.includes(a)&&fresh.found[a]));
+    if(!selected.size){
+      for(const a of skill.agents)if(fresh.found[a]){selected.add(a);break;}
+    }
+    if(!selected.size){
+      clear();header('CHƯA TÌM THẤY TRỢ LÝ AI');
+      line('Hãy cài Claude Code hoặc Codex trước, rồi thử lại.');
+      if(await waitBack()==='quit')return 'quit';
+      continue;
+    }
+    const next=await checklist({
+      title:'CHỌN AGENT CHO '+skill.name.toUpperCase(),
+      subtitle:'Chỉ những agent đã có trên máy mới được cài skill',
+      selected,
+      items:AGENTS.filter(a=>skill.agents.includes(a.id)&&fresh.found[a.bin])
+        .map(a=>({...a,description:skill.automated.includes(a.id)?'Có lệnh cài được hỗ trợ':'Có hướng dẫn thủ công; chưa tự cài'}))
+    });
+    if(next==='quit')return 'quit';
+    if(next==='back')continue;
+    const planForSkill=planSkill(skill.id,[...selected],fresh);
+    if(!planForSkill.steps.length){
+      clear();header('CHƯA CÓ LỆNH CÀI TỰ ĐỘNG');
+      for(const note of planForSkill.notes)line(' • '+note);
+      line('\n Xem tài liệu chính thức: '+skillUrl(skill));
+      if(await waitBack()==='quit')return 'quit';
+      continue;
+    }
+    const proceed=await confirmSetup(planForSkill,{agentIds:[...selected],label:skill.name});
+    if(proceed==='quit')return 'quit';
+    if(proceed==='back')continue;
+    if(await installScreen(planForSkill,{agentIds:[...selected],showHeadroom:false})==='quit')return 'quit';
+  }
+}
+
 async function main(){
   readline.emitKeypressEvents(process.stdin);
   process.stdin.resume();
@@ -318,6 +408,7 @@ async function main(){
       const action=await dashboard();
       if(action==='quit')break;
       const result=action==='setup'?await setupWizard()
+        :action==='catalog'?await skillCatalogScreen()
         :action==='config'?await configScreen():await helpScreen();
       if(result==='quit')break;
     }

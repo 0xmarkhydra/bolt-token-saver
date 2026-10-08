@@ -22,6 +22,7 @@ npm start                      # Interactive TUI (requires a real terminal)
 
 - `test/core.test.mjs`: cross-platform planning and command runner with mocked binaries/spawn.
 - `test/status.test.mjs`: missing configs, safe model names, positive plugin/hook heuristics, and API key/endpoint redaction.
+- `test/skill-catalog.test.mjs`: 10 unique sources, per-agent compatibility, safe command previews, collection/core no-op behavior.
 - For interactive changes, test in a PTY using keyboard input, navigate each screen, cancel at the install confirmation screen, and verify that **no install step ran**.
 - For OS-specific changes, verify tests on that OS if available; otherwise state the limitation clearly.
 - Check `git diff --check` and ensure any examples in the README match the current CLI.

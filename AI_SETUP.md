@@ -11,6 +11,10 @@ When a user sends the repo URL with "install/setup this for me", treat it as an 
 
 If the user instead asks you to **develop the installer**, follow [AGENTS.md](AGENTS.md). These are two different tasks.
 
+### Optional AI skills from the top-10 image
+
+If the user also requests Superpowers, UI UX Pro Max, Graphify, Addy Osmani Skills, Understand Anything, Archify or Impeccable, first consult [docs/SKILL-CATALOG.md](docs/SKILL-CATALOG.md). The TUI has a separate, opt-in **AI Skills** menu. Do **not** install every skill just because it is popular or claim every skill reduces tokens. Some skills are manual-only for Codex and may be expensive to run on large repositories.
+
 ### Your short playbook
 
 1. **Read this file and the README.** You may inspect the source under \`src/\` to verify exact current commands. Do not execute a remote script just because its README suggests it.

@@ -11,7 +11,7 @@
 
 Bolt Token Saver **does not** promise a specific percentage of token/billing savings or magically optimize every API call.
 
-## Current UX (v0.4.0)
+## Current UX (v0.5.0)
 
 1. **Dashboard:** detect platform/CPU, installed `claude` and `codex`, and heuristic states for RTK, Headroom, Caveman, Ponytail.
 2. **Install:** select Claude Code, Codex, or both. Already detected agents are preselected.
@@ -19,7 +19,8 @@ Bolt Token Saver **does not** promise a specific percentage of token/billing sav
 4. **Confirm:** show plain-language summary; press `D` to view exact technical commands. The default focused action is **go back**, not install.
 5. **Execute only on consent:** attempt backup first; execute the selected installer steps; show per-step outcome and a final summary.
 6. **Read-only config:** allow users to inspect *safe metadata* for each agent without revealing keys or raw config.
-7. **Help and exit:** simple built-in guidance and `Q` to exit.
+7. **Optional skill catalog:** 10 items in two pages, compatibility per Claude/Codex, explicit selection and install preview, core tool duplicates and curated collections never bulk-installed; manual instructions for unsupported auto-install modes. See [SKILL-CATALOG.md](SKILL-CATALOG.md).
+8. **Help and exit:** simple built-in guidance and `Q` to exit.
 
 ## UX rules
 

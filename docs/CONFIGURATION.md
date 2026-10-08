@@ -1,6 +1,6 @@
 # Config discovery and privacy rules
 
-This document describes the **implemented v0.4.0** read-only configuration screen. It does **not** claim that tools are functioning end-to-end.
+This document describes the **implemented v0.5.0** read-only configuration screen. Optional skills from [SKILL-CATALOG.md](SKILL-CATALOG.md) are not yet auto-detected as installed/enabled/working. It does **not** claim that tools are functioning end-to-end.
 
 ## Sources inspected
 

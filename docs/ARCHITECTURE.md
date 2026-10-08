@@ -1,10 +1,11 @@
-# Architecture — Bolt Token Saver v0.4.0
+# Architecture — Bolt Token Saver v0.5.0
 
 ## Current stack
 
 - Node.js 20+ **ES modules**, no third-party runtime npm dependencies.
 - Terminal output uses ANSI styling; keyboard input uses Node's built-in `readline`.
 - `package.json` exposes the CLI through `bin.bolt-token-saver = ./src/cli.mjs`.
+- `src/skill-catalog.mjs` maps 10 optional skills to allowlisted install plans, agent compatibility and manual instructions.
 - Works locally via scripts or from GitHub through `npx -y github:0xmarkhydra/bolt-token-saver` (requires Node + Git).
 
 ## Runtime flow
@@ -32,6 +33,7 @@ src/cli.mjs
 | `core.mjs` | executable detection, installation plans, subprocess results | remote API keys, interactive UI |
 | `status.mjs` | safe **read-only** config discovery | printing raw TOML/JSON, editing configs, upstream calls |
 | `backup.mjs` | snapshots of existing known agent config files | restoration without separate explicit approval |
+| `skill-catalog.mjs` | curated optional skills, per-agent command plans | free-form shell commands, downloading on import, installing entire collections |
 
 ## Operating system detection
 

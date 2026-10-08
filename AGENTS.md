@@ -20,6 +20,7 @@ It helps nontechnical users install/configure RTK, Headroom, Caveman and Ponytai
 - `src/core.mjs` — agent/tool metadata, OS/PATH detection, installer plan and execution.
 - `src/status.mjs` — **read-only** configuration/status inspection with strict redaction.
 - `src/backup.mjs` — backup of existing user agent configurations before changes.
+- `src/skill-catalog.mjs` — allowlisted optional skill catalog and per-agent install plan; **no auto-installs**.
 - `test/*.test.mjs` — Node built-in test runner.
 - `RUN-WINDOWS.cmd`, `run-macos-linux.sh` — local launchers.
 - `BOLT-CLAUDE.cmd`, `BOLT-CODEX.cmd`, `bolt-claude.sh`, `bolt-codex.sh` — Headroom-specific wrappers.
@@ -30,6 +31,7 @@ It helps nontechnical users install/configure RTK, Headroom, Caveman and Ponytai
 - Product goals, user journeys, accepted behavior: [docs/PRODUCT.md](docs/PRODUCT.md)
 - Code boundaries, data flow, safety: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Supported detection and configuration rules: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
+- Optional AI Skills: [docs/SKILL-CATALOG.md](docs/SKILL-CATALOG.md)
 - Setup, tests, debugging: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - How to hand off a feature to an AI agent: [docs/AI-HANDOFF.md](docs/AI-HANDOFF.md)
 - New feature specification template: [docs/FEATURE-SPEC-TEMPLATE.md](docs/FEATURE-SPEC-TEMPLATE.md)
@@ -42,7 +44,8 @@ It helps nontechnical users install/configure RTK, Headroom, Caveman and Ponytai
 4. Do not perform installation, run upstream installers, alter user configuration, or call third-party proxies during automated tests. Mock command execution.
 5. Keep status reads passive: **never print credentials, tokens, private config bodies, endpoint URLs, or secrets**. Treat logs from external installers as untrusted.
 6. Preserve the flow: dashboard → agent selection → tool selection → human-readable preview → explicit confirmation → backup → install → result. No installation before consent.
-7. Favor Vietnamese first for end-user TUI copy. Keep agent-facing technical docs readable in English; update screenshots/examples when behavior changes.
+7. For added skills, keep them optional in a separate catalog, verify official install commands, and never claim they save tokens unless measured.
+8. Favor Vietnamese first for end-user TUI copy. Keep agent-facing technical docs readable in English; update screenshots/examples when behavior changes.
 8. Third-party installation commands must be verified against official upstream docs when modified; report unsupported options rather than guessing.
 9. Follow the change's requested scope. Do not silently introduce auto-updaters, telemetry, model/API key prompts, or privileged system changes.
 10. If a feature is incomplete or unverified, say so in the UI/docs; a command exiting 0 is not proof the tool works end-to-end.

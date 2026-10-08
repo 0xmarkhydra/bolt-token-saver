@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
-const mustHave=['AI_SETUP.md','AGENTS.md','CLAUDE.md','docs/PRODUCT.md','docs/ARCHITECTURE.md','docs/CONFIGURATION.md','docs/DEVELOPMENT.md','docs/AI-HANDOFF.md','docs/FEATURE-SPEC-TEMPLATE.md'];
+const mustHave=['AI_SETUP.md','AGENTS.md','CLAUDE.md','docs/PRODUCT.md','docs/ARCHITECTURE.md','docs/CONFIGURATION.md','docs/DEVELOPMENT.md','docs/AI-HANDOFF.md','docs/FEATURE-SPEC-TEMPLATE.md','docs/SKILL-CATALOG.md'];
 
 test('AI entrypoints and referenced project documents exist',()=>{
   for(const file of mustHave) assert.ok(fs.statSync(path.join(root,file)).isFile(),file);
@@ -29,7 +29,7 @@ test('relative Markdown document links resolve',()=>{
 
 test('agent instructions map matches actual source/test files',()=>{
   const content=read('AGENTS.md');
-  const paths=['src/cli.mjs','src/core.mjs','src/status.mjs','src/backup.mjs',
+  const paths=['src/cli.mjs','src/core.mjs','src/status.mjs','src/backup.mjs','src/skill-catalog.mjs',
   'run-macos-linux.sh','RUN-WINDOWS.cmd','test/core.test.mjs','test/status.test.mjs'];
   for(const file of paths){
     assert.ok(fs.existsSync(path.join(root,file)),file);
