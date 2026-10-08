@@ -9,6 +9,21 @@ Install and configure token-saving tools for **Claude Code** and/or **OpenAI Cod
 | [Caveman](https://github.com/JuliusBrussee/caveman) | Concise model responses |
 | [Ponytail](https://github.com/DietrichGebert/ponytail) | Lean implementations |
 
+## One command on Windows, macOS, and Linux
+
+With **Node.js 20+** and **Git** installed, open Windows Terminal / PowerShell / CMD, macOS Terminal, or a Linux terminal and run:
+
+```bash
+npx -y github:0xmarkhydra/bolt-token-saver
+```
+
+This starts the same interactive menu on all three operating systems. It auto-detects the OS/architecture and installed AI coding agents. **It will not install any optimization until you confirm the preview.**
+
+- **Windows PowerShell** with a restrictive script policy: use `npx.cmd -y github:0xmarkhydra/bolt-token-saver` instead.
+- **npm 12+** disables Git dependencies by default. If you get `EALLOWGIT`, explicitly opt in for this trusted repo: `npx --allow-git=root -y github:0xmarkhydra/bolt-token-saver`.
+- To check the environment without installing: `npx -y github:0xmarkhydra/bolt-token-saver --doctor`.
+- This GitHub installation requires Git. Publishing `bolt-token-saver` to the npm registry in the future would allow `npx -y bolt-token-saver` without Git, **but this npm package has not been published**.
+
 ## Run
 
 **Windows:** Download the repository ZIP, extract it, double-click `RUN-WINDOWS.cmd`. If Node.js is absent, the launcher offers installation through WinGet.
