@@ -1,5 +1,21 @@
 # ⚡ Bolt Token Saver
 
+## 🤖 Nhờ AI tự cài đặt cho bạn (Claude Code / Codex)
+
+**Chỉ cần gửi [link này](https://github.com/0xmarkhydra/bolt-token-saver/blob/main/AI_SETUP.md) cho AI đang chạy trên máy của bạn**, kèm yêu cầu:
+
+```text
+Đọc https://github.com/0xmarkhydra/bolt-token-saver/blob/main/AI_SETUP.md
+và tự setup các công cụ tối ưu token cho Claude Code/Codex tôi đang dùng.
+Hãy kiểm tra hệ điều hành và cấu hình có sẵn, đề xuất RTK + Ponytail.
+Cho tôi xem kế hoạch và xin xác nhận trước khi cài hoặc sửa cấu hình.
+Sau khi thực hiện, kiểm tra kết quả và chỉ báo những gì đã xác minh.
+Không hiển thị API key hay URL endpoint riêng tư.
+```
+
+AI có quyền dùng terminal (Claude Code/Codex CLI/CodeLocal) có thể thực hiện sau khi được bạn đồng ý. AI chỉ có quyền đọc web thì **không thể tự cài**. [Quy trình đầy đủ cho AI →](AI_SETUP.md)
+
+
 **Một công cụ Terminal UI dễ sử dụng để thiết lập tối ưu token cho Claude Code và Codex.**
 
 Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
@@ -100,6 +116,31 @@ npm run check    # Syntax + unit tests
 ```
 
 Node.js 20+; không cần tải thêm npm dependency để chạy TUI. Có GitHub Actions test Windows/macOS/Linux (trạng thái chạy phụ thuộc quyền và tình trạng billing của repo).
+
+## 🤖 Dành cho AI coding agents (Codex / Claude Code)
+
+Bạn có thể giao repository này cho AI để **đọc hiểu dự án, sửa code, bổ sung tính năng hoặc review** mà không phải copy toàn bộ tài liệu vào chat:
+
+- [**AGENTS.md**](AGENTS.md) — quy tắc chung cho AI, đặc biệt Codex: mục tiêu, file quan trọng, lệnh kiểm thử, giới hạn bảo mật.
+- [**CLAUDE.md**](CLAUDE.md) — điểm vào cho Claude Code; dùng chung quy tắc trong `AGENTS.md`, tránh viết lại.
+- [**docs/AI-HANDOFF.md**](docs/AI-HANDOFF.md) — cách giao việc và prompt mẫu để AI triển khai từ yêu cầu đến test.
+- [**docs/PRODUCT.md**](docs/PRODUCT.md) — trải nghiệm người dùng và chức năng đang có.
+- [**docs/ARCHITECTURE.md**](docs/ARCHITECTURE.md) — kiến trúc và vị trí sửa từng thành phần.
+- [**docs/CONFIGURATION.md**](docs/CONFIGURATION.md) — cách đọc config Claude/Codex và giới hạn bảo mật.
+- [**docs/DEVELOPMENT.md**](docs/DEVELOPMENT.md) — chạy, kiểm thử và debug.
+- [**docs/FEATURE-SPEC-TEMPLATE.md**](docs/FEATURE-SPEC-TEMPLATE.md) — mẫu tài liệu tính năng để yêu cầu AI làm đúng phạm vi.
+
+**Cách nhanh nhất:** mở repo trong Codex hoặc Claude Code rồi gửi:
+
+```text
+Hãy đọc AGENTS.md / CLAUDE.md và docs/AI-HANDOFF.md.
+Tóm tắt dự án, xác định file liên quan đến yêu cầu của tôi, rồi
+triển khai thay đổi nhỏ nhất có đủ test. Không chạy bộ cài bên thứ
+ba hoặc thay đổi cấu hình người dùng khi chưa được xác nhận.
+Chạy npm run check và báo rõ kết quả.
+```
+
+Các tài liệu mô tả **hành vi hiện tại** và các giới hạn chưa hỗ trợ; hướng dẫn AI không đồng nghĩa hệ thống được tự cấp quyền truy cập máy hay tự push.
 
 ## Bảo mật
 

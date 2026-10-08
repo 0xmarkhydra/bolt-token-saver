@@ -1,0 +1,43 @@
+# Config discovery and privacy rules
+
+This document describes the **implemented v0.4.0** read-only configuration screen. It does **not** claim that tools are functioning end-to-end.
+
+## Sources inspected
+
+| Agent | File(s) examined | Fields shown to the user |
+|---|---|---|
+| Claude Code | `$CLAUDE_CONFIG_DIR/settings.json` or `~/.claude/settings.json`; `~/.claude/plugins/installed_plugins.json` (under configured Claude dir) | config exists, sanitized model, custom endpoint **yes/no**, credential detected **yes/no**, RTK hook indication, plugin indicators |
+| Codex | `$CODEX_HOME/config.toml` or `~/.codex/config.toml`; `hooks.json` | config exists, top-level model, endpoint **yes/no**, API key env present **yes/no**, RTK hook indication, skill/plugin indications |
+
+The tool also checks the known skill paths `~/.codex/skills/<tool>/SKILL.md` and `~/.agents/skills/<tool>/SKILL.md`. Presence is **not equivalent to active support**.
+
+## Data never displayed
+
+- API keys, OAuth tokens, passwords, or values from auth configuration.
+- Private upstream URL, proxy URL, or arbitrary endpoint body.
+- Raw TOML/JSON settings, custom headers, cookies, or plugin install metadata.
+- Full prompts or private source code.
+
+The status reader exposes only explicit summary fields. A model name is shown only if it matches a short safe character whitelist; otherwise it becomes a generic "configured, value hidden" label.
+
+## Status terminology
+
+- **Agent found:** its executable is on PATH or a known executable folder.
+- **Tool found:** binary/known config artifact was detected.
+- **Enabled:** a known config flag signals activation (not always possible to prove).
+- **Working:** requires an explicit non-destructive integration test; **not implemented**.
+- **Token saved:** requires measured before/after data; **not implemented**.
+
+Do not label a tool "working" solely because its install command returned exit code 0.
+
+## Current feature constraints
+
+- The config screen has **no edit, toggle, or save buttons**.
+- It does not call model APIs and must not validate credentials over the network.
+- It intentionally does not show endpoint values, even when a user has a custom gateway.
+- These are heuristic discoveries; upstream agents can change config structure.
+- Headroom presence alone is not proof of proxy use: the separate launcher must be used.
+
+## Development test requirements
+
+Changes to the reader should add a synthetic temp-home fixture in `test/status.test.mjs` and assert that sentinel API keys and endpoint strings do **not** appear in the serialized summary. Also test missing/malformed config without crashing. Avoid fixtures containing any real secrets.
