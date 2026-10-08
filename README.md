@@ -1,62 +1,112 @@
-# ⚡ Bolt Token Saver — Terminal UI
+# ⚡ Bolt Token Saver
 
-Install and configure token-saving tools for **Claude Code** and/or **OpenAI Codex** on **Windows, macOS and Linux**.
+**Một công cụ Terminal UI dễ sử dụng để thiết lập tối ưu token cho Claude Code và Codex.**
 
-| Tool | Purpose |
-|---|---|
-| [RTK](https://github.com/rtk-ai/rtk) | Compress terminal output |
-| [Headroom](https://github.com/chopratejas/headroom) | Context proxy |
-| [Caveman](https://github.com/JuliusBrussee/caveman) | Concise model responses |
-| [Ponytail](https://github.com/DietrichGebert/ponytail) | Lean implementations |
+Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
 
-## One command on Windows, macOS, and Linux
+**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.4.0
 
-With **Node.js 20+** and **Git** installed, open Windows Terminal / PowerShell / CMD, macOS Terminal, or a Linux terminal and run:
+## 🚀 Chạy bằng một lệnh
+
+Yêu cầu **Node.js 20+ và Git**. Trong Terminal trên Windows, macOS hoặc Linux, chạy:
 
 ```bash
 npx -y github:0xmarkhydra/bolt-token-saver
 ```
 
-This starts the same interactive menu on all three operating systems. It auto-detects the OS/architecture and installed AI coding agents. **It will not install any optimization until you confirm the preview.**
+- Nếu PowerShell chặn `npx.ps1`: dùng `npx.cmd -y github:0xmarkhydra/bolt-token-saver`.
+- Với npm 12+ khi gặp lỗi `EALLOWGIT`: `npx --allow-git=root -y github:0xmarkhydra/bolt-token-saver`.
+- Không muốn dùng Git CLI: tải ZIP repo, giải nén, chạy `RUN-WINDOWS.cmd` (Windows) hoặc `bash run-macos-linux.sh` (macOS/Linux). Trên Windows, file CMD có thể đề nghị cài Node LTS qua WinGet.
+- **Chưa xuất bản lên npm registry**: hiện chưa thể dùng `npx bolt-token-saver` trực tiếp.
 
-- **Windows PowerShell** with a restrictive script policy: use `npx.cmd -y github:0xmarkhydra/bolt-token-saver` instead.
-- **npm 12+** disables Git dependencies by default. If you get `EALLOWGIT`, explicitly opt in for this trusted repo: `npx --allow-git=root -y github:0xmarkhydra/bolt-token-saver`.
-- To check the environment without installing: `npx -y github:0xmarkhydra/bolt-token-saver --doctor`.
-- This GitHub installation requires Git. Publishing `bolt-token-saver` to the npm registry in the future would allow `npx -y bolt-token-saver` without Git, **but this npm package has not been published**.
+## ✨ Giao diện v0.4
 
-## Run
+```text
+╭───────────────────────────────────────────────────╮
+│ ⚡ BOLT TOKEN SAVER · v0.4.0                     │
+╰───────────────────────────────────────────────────╯
+ BẢNG ĐIỀU KHIỂN — Windows / macOS / Linux
 
-**Windows:** Download the repository ZIP, extract it, double-click `RUN-WINDOWS.cmd`. If Node.js is absent, the launcher offers installation through WinGet.
+ TRỢ LÝ LẬP TRÌNH
+   Claude Code     ✓ Đã nhận diện
+   OpenAI Codex    ✓ Đã nhận diện
 
-**macOS / Linux:**
-```bash
-bash run-macos-linux.sh
+ CÔNG CỤ TỐI ƯU
+   RTK             ○ Chưa xác nhận cài đặt
+   Headroom        ○ Chưa xác nhận cài đặt
+   Caveman         ○ Chưa xác nhận cài đặt
+   Ponytail        ○ Chưa xác nhận cài đặt
+
+ BẠN MUỐN LÀM GÌ?
+ ❯ 1. Cài đặt tối ưu token
+   2. Xem trạng thái & cấu hình
+   3. Hướng dẫn sử dụng
+   4. Thoát
+
+ ↑ ↓ Di chuyển     Enter Chọn     Q Thoát
 ```
 
-Requires Node.js 20+ (zero npm dependencies). Navigate using **↑ ↓**, **Space**, **Enter**, **Esc** and **Q**.
+### 1. Cài đặt tối ưu token
 
-The TUI detects installed agents, lets you choose any tool combination, previews commands and asks for confirmation. It backs up existing Claude/Codex settings to `~/.bolt-token-saver/backups/` before installing third-party tools.
+1. Chọn **Claude Code**, **Codex** hoặc cả hai (tự nhận diện agent có sẵn).
+2. Chọn công cụ. Mặc định gợi ý **RTK + Ponytail**; Caveman và Headroom là lựa chọn bổ sung.
+3. Xem bản tóm tắt trước khi cài. Nhấn **D** để xem lệnh kỹ thuật nếu muốn.
+4. Di chuyển đến **ĐỒNG Ý** để bắt đầu. Cấu hình cũ được sao lưu trước khi thay đổi.
+5. Xem kết quả từng bước, sau đó quay về Dashboard.
 
-## Inspect without installing
+**Không tự cài khi chỉ mở TUI hoặc khi đang xem cấu hình.**
+
+### 2. Xem trạng thái & cấu hình
+
+Màn hình chỉ đọc, gồm:
+
+- Phát hiện Claude/Codex đã cài hay chưa.
+- Tệp cấu hình có tồn tại không.
+- Model đang thiết lập (khi nhận diện được tên model an toàn).
+- Có sử dụng endpoint tùy chỉnh hay không (**không hiện URL**).
+- Có dấu hiệu cấu hình khóa truy cập hay không (**không hiện API key/token**).
+- RTK hook và Caveman/Ponytail plugin/skill có dấu hiệu xuất hiện trong config hay không.
+
+Đây là **phát hiện bằng CLI và tệp cấu hình**, không phải kiểm tra live rằng hook hoạt động hay lượng token đã giảm. Headroom chỉ chạy khi bạn dùng launcher riêng.
+
+### 3. Hướng dẫn sử dụng
+
+Phím tắt: **↑/↓** di chuyển, **Space** tích/bỏ chọn, **Enter** tiếp tục, **Esc** quay lại, **Q** thoát.
+
+## Công cụ
+
+| Tool | Chức năng | Ghi chú |
+|---|---|---|
+| [RTK](https://github.com/rtk-ai/rtk) | Nén output lệnh terminal | Cần hook cho agent |
+| [Ponytail](https://github.com/DietrichGebert/ponytail) | Giảm overengineering, viết code gọn | Đề xuất mặc định |
+| [Caveman](https://github.com/JuliusBrussee/caveman) | Giảm verbosity | Tùy chọn |
+| [Headroom](https://github.com/chopratejas/headroom) | Context/proxy optimization | Tùy chọn nâng cao, cần launcher |
+
+## Chạy agent qua Headroom
+
+Sau khi cài Headroom thành công:
+
+- **Windows:** `BOLT-CLAUDE.cmd` hoặc `BOLT-CODEX.cmd`.
+- **macOS / Linux:** `bash bolt-claude.sh` hoặc `bash bolt-codex.sh`.
+
+Cần kiểm tra upstream URL/key nếu dùng model gateway cá nhân. Không mở proxy local ra Internet.
+
+## Developer / Kiểm tra nhanh
 
 ```bash
-npm run doctor
-npm run plan
-npm run check
+npm run doctor   # Chỉ in tình trạng phát hiện, không cài
+npm run plan     # Xem các lệnh mặc định, không cài
+npm run check    # Syntax + unit tests
 ```
 
-## After installation
+Node.js 20+; không cần tải thêm npm dependency để chạy TUI. Có GitHub Actions test Windows/macOS/Linux (trạng thái chạy phụ thuộc quyền và tình trạng billing của repo).
 
-- Restart Claude/Codex to activate hooks/plugins.
-- For Headroom: launch with `BOLT-CLAUDE.cmd` or `BOLT-CODEX.cmd` (Windows); `bash bolt-claude.sh` or `bash bolt-codex.sh` (macOS/Linux).
-- On Codex, inspect and approve Ponytail's hooks using `/hooks` where applicable.
-- Configure gateway/upstream credentials outside this installer. Do not expose local proxy publicly.
-- RTK statistics are estimates about filtered command output, not guaranteed billing reductions.
+## Bảo mật
 
-## Security and limitations
+- Xem cấu hình: chỉ hiển thị trường whitelist, không xuất giá trị API key hoặc endpoint.
+- Cài đặt: yêu cầu người dùng xác nhận trước khi thực thi lệnh tải/cài bên thứ ba.
+- Sao lưu cấu hình vào `~/.bolt-token-saver/backups/` nếu có tệp cần bảo vệ.
+- Các công cụ upstream có thể thay đổi phương thức cài. Kiểm tra nguồn và quyền cài đặt trước khi đồng ý.
+- Không cộng dồn các tuyên bố % tiết kiệm token; cần đo thực tế trong từng hệ thống.
 
-This is a community installer, not affiliated with OpenAI or Anthropic. Upstream commands change over time; verify the source before installing. A successful command exit does not prove end-to-end functionality. Tool installation needs Internet access and may require OS package manager permissions. No API keys are collected by Bolt Token Saver.
-
-## License
-
-MIT
+**MIT License** · Independent community installer; không trực thuộc OpenAI, Anthropic hay các dự án upstream.
