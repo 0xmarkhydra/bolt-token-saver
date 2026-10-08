@@ -1,0 +1,30 @@
+name: Portable TUI Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run check
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: zip -r bolt-token-saver-tui.zip src test RUN-WINDOWS.cmd BOLT-CLAUDE.cmd BOLT-CODEX.cmd run-macos-linux.sh bolt-claude.sh bolt-codex.sh package.json README.md SECURITY.md LICENSE
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: bolt-token-saver-tui.zip
+          generate_release_notes: true

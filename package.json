@@ -1,0 +1,21 @@
+{
+  "name": "bolt-token-saver",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive terminal installer for token-saving AI coding agents",
+  "bin": {
+    "bolt-token-saver": "./src/cli.mjs"
+  },
+  "scripts": {
+    "start": "node src/cli.mjs",
+    "doctor": "node src/cli.mjs --doctor",
+    "plan": "node src/cli.mjs --plan",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/cli.mjs && node --check src/core.mjs && node --check src/backup.mjs && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
