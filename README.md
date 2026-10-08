@@ -20,7 +20,7 @@ AI có quyền dùng terminal (Claude Code/Codex CLI/CodeLocal) có thể thực
 
 Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
 
-**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.1
+**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.2
 
 ## 🪟 Windows: RTK không cần WinGet (v0.5.1)
 
@@ -86,6 +86,21 @@ npx -y github:0xmarkhydra/bolt-token-saver
 5. Xem kết quả từng bước, sau đó quay về Dashboard.
 
 **Không tự cài khi chỉ mở TUI hoặc khi đang xem cấu hình.**
+
+### Trạng thái cài đặt AI Skills — v0.5.2
+
+Sau khi cài AI Skill, Dashboard sẽ tự đọc lại danh sách plugin Claude Code
+(`~/.claude/plugins/installed_plugins.json`, `enabledPlugins` trong settings)
+và một số đường dẫn `SKILL.md` thông dụng của Claude/Codex.
+Nếu tìm thấy, Dashboard và danh mục AI Skills hiển thị **✓ Đã cài**
+hoặc **✓ Đã bật (Claude)**. Nếu chưa có dữ liệu xác minh, hiển thị
+**○ Chưa xác minh** — không tự suy ra cài đặt thất bại.
+
+**Ví dụ UI UX Pro Max:** nếu Claude báo "plugin ... already installed",
+Bolt sẽ nhận diện bằng registry plugin khi quay về Dashboard.
+Các dấu hiệu này **không** chứng minh hook/skill đang hoạt động trong mọi phiên.
+Nếu chưa thấy tích xanh, thử khởi động lại Claude/terminal, kiểm tra đúng
+profile Claude đang dùng, rồi thử lại. Không cần cài lại plugin ngay.
 
 ### 3. Xem trạng thái & cấu hình
 

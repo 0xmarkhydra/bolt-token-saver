@@ -5,7 +5,7 @@ import {inspect} from './status.mjs';
 import {backup} from './backup.mjs';
 import {SKILL_CATALOG, skillUrl, planSkill} from './skill-catalog.mjs';
 
-const VERSION='0.5.1';
+const VERSION='0.5.2';
 const args=process.argv.slice(2);
 const tty=!!(process.stdin.isTTY&&process.stdout.isTTY);
 const tint=(s,n)=>tty?'\x1b['+n+'m'+s+'\x1b[0m':s;
@@ -36,6 +36,12 @@ function header(title,subtitle=''){
 function detectionLabel(found){return found?good('✓ Đã nhận diện'):warn('○ Chưa tìm thấy');}
 function statusLabel(tool){
   return tool.installed?good('✓ Có dấu hiệu đã cài'):warn('○ Chưa xác nhận cài đặt');
+}
+function skillStatusText(state){
+  if(!state||!state.installed)return warn('○ Chưa xác minh');
+  if(state.claude.enabled)return good('✓ Đã bật theo config (Claude)');
+  if(state.claude.installed&&state.codex.installed)return good('✓ Đã cài (Claude + Codex)');
+  return good(state.claude.installed?'✓ Đã cài (Claude)':'✓ Đã cài (Codex)');
 }
 function menuFooter(){line('\n '+accent('↑ ↓')+' Di chuyển  '+accent('Enter')+' Chọn  '+accent('Q')+' Thoát');}
 function doctor(){
@@ -156,6 +162,13 @@ async function dashboard(){
     for(const t of TOOLS){
       line('   '+t.name.padEnd(15)+' '+statusLabel(s.tools[t.id]));
     }
+    const installedSkills=SKILL_CATALOG.filter(x=>x.type!=='core'&&s.skillStates[x.id]?.installed);
+    if(installedSkills.length){
+      line('\n '+strong('AI SKILLS ĐÃ NHẬN DIỆN'));
+      for(const skill of installedSkills.slice(0,4))
+        line('   '+skill.name.padEnd(19)+' '+skillStatusText(s.skillStates[skill.id]));
+      if(installedSkills.length>4)line('   ... và '+(installedSkills.length-4)+' skill khác (xem mục 2)');
+    }
     line('\n '+strong('BẠN MUỐN LÀM GÌ?'));
     options.forEach((o,i)=>{
       line(' '+(i===cursor?accent('❯'):' ')+' '+(i===cursor?strong(o.name):o.name));
@@ -198,7 +211,12 @@ async function configScreen(){
   }
   line(strong(' CÔNG CỤ CÀI ĐẶT TRÊN MÁY'));
   for(const t of TOOLS)line('   '+t.name.padEnd(13)+(s.tools[t.id].installed?'Đã nhận diện / tìm thấy cấu hình':'Chưa xác minh'));
-  line('\n '+tint('Lưu ý: Đây là kiểm tra cấu hình tĩnh, không gửi yêu cầu AI và không đo token.',90));
+  line('\n '+strong(' AI SKILLS MỞ RỘNG'));
+  for(const skill of SKILL_CATALOG.filter(x=>x.type!=='core'&&x.type!=='collection')){
+    line('   '+skill.name.padEnd(19)+skillStatusText(s.skillStates[skill.id]));
+  }
+  line('\n '+tint('Trạng thái đọc từ tệp cài/setting; không chứng minh skill hoạt động.',90));
+  line(tint('Không gửi yêu cầu AI và không đo token.',90));
   return waitBack();
 }
 async function helpScreen(){
@@ -260,7 +278,7 @@ function sanitizeOutput(input){
   return input.replace(/\b(?:sk-[A-Za-z0-9_-]{10,}|gh[pousr]_[A-Za-z0-9_]{12,})\b/g,'[ĐÃ ẨN]')
     .replace(/((?:api[_-]?key|auth(?:orization)?|secret|token)\s*[:=]\s*)\S+/gi,'$1[ĐÃ ẨN]');
 }
-async function installScreen(p,{agentIds=[...selectedAgents],showHeadroom=true}={}){
+async function installScreen(p,{agentIds=[...selectedAgents],showHeadroom=true,skillId=null}={}){
   clear();header('ĐANG CÀI ĐẶT','Quá trình có thể yêu cầu xác nhận quyền từ hệ điều hành');
   process.stdin.setRawMode(false);
   let summary;
@@ -283,6 +301,13 @@ async function installScreen(p,{agentIds=[...selectedAgents],showHeadroom=true}=
   line('\n Khởi động lại Claude/Codex để các tích hợp mới có hiệu lực.');
   if(showHeadroom&&selectedTools.has('headroom')){
     line(' Headroom: dùng BOLT-CLAUDE / BOLT-CODEX launcher thay vì chạy agent trực tiếp.');
+  }
+  if(skillId){
+    const observed=inspect().skillStates[skillId];
+    line('\n '+strong('KIỂM TRA SAU CÀI'));
+    line(' '+skillStatusText(observed));
+    if(!observed?.installed)line(' '+warn('Các lệnh có thể đã chạy xong nhưng chưa thấy plugin/skill trong cấu hình được hỗ trợ.'));
+    line(' '+tint('Đã cài hoặc đã bật không đồng nghĩa chắc chắn đang hoạt động trong AI.',90));
   }
   for(const note of p.notes||[])line(' • '+note);
   line(' Bạn có thể quay về trang chủ để kiểm tra lại cấu hình.');
@@ -320,13 +345,16 @@ async function skillCatalogScreen(){
   let page=0;
   for(;;){
     const from=page*pageSize;
+    const visibleStatus=inspect().skillStates;
     const chosen=await menu({
       title:'THƯ VIỆN AI SKILLS — TOP 10',
       subtitle:'Trang '+(page+1)+'/2 · Mở rộng khả năng AI, không nhất thiết tiết kiệm token',
       options:[
         ...SKILL_CATALOG.slice(from,from+pageSize).map((s,i)=>({
           id:s.id,name:String(from+i+1).padStart(2)+'. '+s.name,
-          detail:s.type==='core'?good('· Đã tích hợp'):s.type==='collection'?warn('· Chỉ tham khảo'):'',
+          detail:s.type==='collection'?warn('· Danh mục tham khảo'):
+            visibleStatus[s.id]?.installed?skillStatusText(visibleStatus[s.id]):
+            s.type==='core'?tint('· Bộ tối ưu',90):'',
           description:s.about
         })),
         ...(page>0?[{id:'previous',name:'← 5 skill trước'}]:[]),
@@ -349,6 +377,7 @@ async function skillCatalogScreen(){
       line(' Nguồn: '+accent(skillUrl(skill)));
       line(' Hỗ trợ: '+skill.agents.map(a=>agentNames[a]).join(' + '));
       line(' Cài trực tiếp: '+(possible?skill.automated.map(a=>agentNames[a]).join(', '):'Không ở mục này'));
+      line(' Trạng thái: '+skillStatusText(inspect().skillStates[skill.id]));
       if(skill.note)line('\n '+warn(' Lưu ý: ')+skill.note);
       if(skill.risk)line(' '+warn(' Cảnh báo: ')+skill.risk);
       line('\n '+tint('Không phải công cụ tiết kiệm token; một số skill có thể tăng',90));
@@ -395,7 +424,7 @@ async function skillCatalogScreen(){
     const proceed=await confirmSetup(planForSkill,{agentIds:[...selected],label:skill.name});
     if(proceed==='quit')return 'quit';
     if(proceed==='back')continue;
-    if(await installScreen(planForSkill,{agentIds:[...selected],showHeadroom:false})==='quit')return 'quit';
+    if(await installScreen(planForSkill,{agentIds:[...selected],showHeadroom:false,skillId:skill.id})==='quit')return 'quit';
   }
 }
 

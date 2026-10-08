@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {detect} from './core.mjs';
+import {SKILL_CATALOG} from './skill-catalog.mjs';
 
 function readText(file) {
   try {
@@ -44,6 +45,30 @@ export function inspect(options={}) {
   const codexToml=readText(codexFile);
   const codexHooks=readJson(path.join(codexDir,'hooks.json'));
   const codexModel=(codexToml.match(/^\s*model\s*=\s*"([^"\n]+)"/m)||[])[1];
+  // Known filesystem/registry evidence only. Absence is "not verified", never "not installed".
+  const aliases={
+    'addy-agent-skills':'agent-skills',
+    'ui-ux-pro-max':'ui-ux-pro-max',
+  };
+  const entries=Object.keys(installed.plugins||installed);
+  const skillStates={};
+  for(const skill of SKILL_CATALOG){
+    const key=aliases[skill.id]||skill.id;
+    if(skill.type==='collection'){
+      skillStates[skill.id]={claude:{installed:false,enabled:false},codex:{installed:false},installed:false,collection:true};
+      continue;
+    }
+    const claudePlugin=entries.some(name=>pluginMentioned(name,key));
+    const enabledEntry=Object.entries(enabled).some(([name,isOn])=>pluginMentioned(name,key)&&isOn===true);
+    const claudeSkill=exists(path.join(claudeDir,'skills',key,'SKILL.md'));
+    const codexSkill=exists(path.join(codexDir,'skills',key,'SKILL.md')) ||
+      exists(path.join(home,'.agents','skills',key,'SKILL.md'));
+    skillStates[skill.id]={
+      claude:{installed:claudePlugin||claudeSkill,enabled:enabledEntry},
+      codex:{installed:codexSkill},
+      installed:claudePlugin||claudeSkill||codexSkill||enabledEntry
+    };
+  }
   const plugins={};
   for(const id of ['caveman','ponytail']) {
     const claudeEnabled=Object.entries(enabled).some(([name,on])=>pluginMentioned(name,id)&&on===true);
@@ -79,6 +104,7 @@ export function inspect(options={}) {
       ponytail:{installed:plugins.ponytail.claudeInstalled||plugins.ponytail.codexConfigured,
         details:plugins.ponytail.claudeEnabled?'Claude: plugin bật':'Cần xác minh plugin/skill trong agent'},
     },
-    plugins
+    plugins,
+    skillStates
   };
 }

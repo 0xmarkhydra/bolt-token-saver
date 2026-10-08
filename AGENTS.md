@@ -18,7 +18,7 @@ It helps nontechnical users install/configure RTK, Headroom, Caveman and Ponytai
 
 - `src/cli.mjs` — interactive dashboard, keyboard navigation, wizard, preview, results.
 - `src/core.mjs` — agent/tool metadata, OS/PATH detection, installer plan and execution.
-- `src/status.mjs` — **read-only** configuration/status inspection with strict redaction.
+- `src/status.mjs` — **read-only** configuration/status inspection with strict redaction; includes installed/enabled detection for optional skills.
 - `src/backup.mjs` — backup of existing user agent configurations before changes.
 - `src/skill-catalog.mjs` — allowlisted optional skill catalog and per-agent install plan; **no auto-installs**.
 - `src/install-rtk-windows.mjs` — Windows x64 RTK fallback through official GitHub Release and SHA-256 verification, user PATH only.

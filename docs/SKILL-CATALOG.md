@@ -65,7 +65,7 @@ Upstream documentation can change. Before changing a command, re-check its offic
 - Preview includes any missing prerequisite; don't claim to have installed a skill if its step failed or was skipped.
 - Installation is not a reversible transaction; existing backup covers only known config files. No automatic uninstaller/rollback.
 - If a skill's CLI has interactive prompts, a non-interactive subprocess may fail or need manual follow-up. Report that rather than hanging silently.
-- The config viewer currently focuses on the four core tools; **new catalog skills do not yet have reliable installed/enabled/working status detection**.
+- Since v0.5.2, the Dashboard and catalog show **installed** and (Claude only) **enabled** when recognized via Claude plugin inventory/settings or known global SKILL.md paths. No live **working** check exists; missing evidence is **not verified**, not proof a plugin is absent.
 
 ## For AI assistants given the GitHub URL
 
