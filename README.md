@@ -20,7 +20,40 @@ AI có quyền dùng terminal (Claude Code/Codex CLI/CodeLocal) có thể thực
 
 Không cần biết lập trình: mở lên, xem máy có gì, chọn công cụ, xác nhận — Bolt Token Saver sẽ tự làm theo các bước đã hiển thị.
 
-**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.3
+**Hỗ trợ:** Windows · macOS · Linux | **Phiên bản:** 0.5.4
+
+## 🧩 Ponytail: 6 skill cho Claude Code và Codex
+
+**Một lần cài plugin cho mỗi agent**, tự đi kèm cả 6 skill: `ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`. Không cần cài từng skill và không tự động chép skill sang agent khác.
+
+- Vào **Cài đặt tối ưu token**, chọn Claude Code, Codex hoặc cả hai; bật Ponytail. Xem trước lệnh và **xác nhận** trước khi chương trình cài.
+- Vào **Ponytail Skills · Claude / Codex** (mục 3) để xem từng skill và lệnh dùng đúng trên mỗi agent.
+- Chạy `node src/cli.mjs --ponytail` hoặc `npm run ponytail` để kiểm tra trạng thái chỉ đọc, không gọi AI và không cài plugin.
+- Sau khi cài, **khởi động lại** Claude/Codex; với Codex mở `/hooks` xem và chỉ tin cậy hook đã kiểm tra.
+
+| Skill | Claude Code | Codex |
+|---|---|---|
+| Tối giản code | `/ponytail` | `$ponytail:ponytail` |
+| Review diff | `/ponytail-review` | `$ponytail:ponytail-review` |
+| Audit repo | `/ponytail-audit` | `$ponytail:ponytail-audit` |
+| Theo dõi nợ kỹ thuật | `/ponytail-debt` | `$ponytail:ponytail-debt` |
+| Thống kê benchmark | `/ponytail-gain` | `$ponytail:ponytail-gain` |
+| Hướng dẫn | `/ponytail-help` | `$ponytail:ponytail-help` |
+
+**Lưu ý trạng thái:** `6/6` có nghĩa đã tìm thấy đủ sáu file `SKILL.md` trong các vị trí cài đặt được hỗ trợ, **không phải** bằng chứng hook đã kích hoạt hoặc AI đang làm theo skill. Nếu chỉ có plugin registry nhưng thiếu tệp, TUI sẽ không hiển thị đã xác minh đủ. Kết quả của `ponytail-gain` là benchmark do tác giả công bố, không phải % tiết kiệm trên thiết bị của bạn.
+
+Cách cài thủ công chính thức:
+```bash
+# Claude Code (hai lệnh riêng)
+claude plugin marketplace add DietrichGebert/ponytail
+claude plugin install ponytail@ponytail
+
+# OpenAI Codex
+codex plugin marketplace add DietrichGebert/ponytail
+codex plugin add ponytail@ponytail
+```
+
+Nguồn: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) · [Tài liệu cài đặt](https://github.com/DietrichGebert/ponytail/blob/main/INSTALL.md).
 
 ## 🔎 Khắc phục trường hợp Headroom / Caveman vẫn màu vàng (v0.5.3)
 
@@ -74,11 +107,11 @@ npx -y github:0xmarkhydra/bolt-token-saver
 - Không muốn dùng Git CLI: tải ZIP repo, giải nén, chạy `RUN-WINDOWS.cmd` (Windows) hoặc `bash run-macos-linux.sh` (macOS/Linux). Trên Windows, file CMD có thể đề nghị cài Node LTS qua WinGet.
 - **Chưa xuất bản lên npm registry**: hiện chưa thể dùng `npx bolt-token-saver` trực tiếp.
 
-## ✨ Giao diện v0.5
+## ✨ Giao diện v0.5.4
 
 ```text
 ╭───────────────────────────────────────────────────╮
-│ ⚡ BOLT TOKEN SAVER · v0.5.0                     │
+│ ⚡ BOLT TOKEN SAVER · v0.5.4                     │
 ╰───────────────────────────────────────────────────╯
  BẢNG ĐIỀU KHIỂN — Windows / macOS / Linux
 
@@ -92,12 +125,16 @@ npx -y github:0xmarkhydra/bolt-token-saver
    Caveman         ○ Chưa xác nhận cài đặt
    Ponytail        ○ Chưa xác nhận cài đặt
 
+ PONYTAIL · 6 SKILLS (tệp được tìm thấy)
+   Claude 0/6  ·  Codex 0/6
+
  BẠN MUỐN LÀM GÌ?
  ❯ 1. Cài đặt tối ưu token
    2. Khám phá & cài thêm AI Skills
-   3. Xem trạng thái & cấu hình
-   4. Hướng dẫn sử dụng
-   5. Thoát
+   3. Ponytail Skills · Claude / Codex
+   4. Xem trạng thái & cấu hình
+   5. Hướng dẫn sử dụng
+   6. Thoát
 
  ↑ ↓ Di chuyển     Enter Chọn     Q Thoát
 ```
@@ -127,7 +164,7 @@ Các dấu hiệu này **không** chứng minh hook/skill đang hoạt động t
 Nếu chưa thấy tích xanh, thử khởi động lại Claude/terminal, kiểm tra đúng
 profile Claude đang dùng, rồi thử lại. Không cần cài lại plugin ngay.
 
-### 3. Xem trạng thái & cấu hình
+### 4. Xem trạng thái & cấu hình
 
 Màn hình chỉ đọc, gồm:
 
@@ -140,7 +177,7 @@ Màn hình chỉ đọc, gồm:
 
 Đây là **phát hiện bằng CLI và tệp cấu hình**, không phải kiểm tra live rằng hook hoạt động hay lượng token đã giảm. Headroom chỉ chạy khi bạn dùng launcher riêng.
 
-### 4. Hướng dẫn sử dụng
+### 5. Hướng dẫn sử dụng
 
 Phím tắt: **↑/↓** di chuyển, **Space** tích/bỏ chọn, **Enter** tiếp tục, **Esc** quay lại, **Q** thoát.
 

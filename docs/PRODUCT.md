@@ -11,7 +11,7 @@
 
 Bolt Token Saver **does not** promise a specific percentage of token/billing savings or magically optimize every API call.
 
-## Current UX (v0.5.0)
+## Current UX (v0.5.4)
 
 1. **Dashboard:** detect platform/CPU, installed `claude` and `codex`, and heuristic states for RTK, Headroom, Caveman, Ponytail.
 2. **Install:** select Claude Code, Codex, or both. Already detected agents are preselected.
@@ -20,7 +20,7 @@ Bolt Token Saver **does not** promise a specific percentage of token/billing sav
 5. **Execute only on consent:** attempt backup first; execute the selected installer steps; show per-step outcome and a final summary.
 6. **Read-only config:** allow users to inspect *safe metadata* for each agent without revealing keys or raw config.
 7. **Optional skill catalog:** 10 items in two pages, compatibility per Claude/Codex, explicit selection and install preview, core tool duplicates and curated collections never bulk-installed; manual instructions for unsupported auto-install modes. See [SKILL-CATALOG.md](SKILL-CATALOG.md).
-8. **Help and exit:** simple built-in guidance and `Q` to exit.
+8. **Ponytail Skills:** read-only per-agent 6-skill inventory, exact Claude/Codex commands, optional `--ponytail` CLI view, and skip duplicate plugin installation when a given agent already registered Ponytail. The plugin still requires independent install/activation for each agent.\n9. **Help and exit:** simple built-in guidance and `Q` to exit.
 
 ## UX rules
 
@@ -34,7 +34,7 @@ Bolt Token Saver **does not** promise a specific percentage of token/billing sav
 
 ## Scope and non-goals
 
-**Current:** local TUI, 4 upstream integrations, config detection, installation plans, backups, test suite, CI definition, macOS local smoke test.
+**Current:** local TUI, 4 upstream integrations, Ponytail six-skill read-only inventory per agent, config detection, installation plans, backups, test suite, CI definition, macOS local smoke test.
 
 **Not implemented:** visual editing/toggling of plugin settings; live health checks; token analytics dashboard; safe automated uninstall/rollback; standalone binaries with bundled Node; npm registry publishing; verification of all installers on real Windows/Linux machines.
 

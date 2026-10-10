@@ -4,8 +4,9 @@ import {AGENTS, TOOLS, detect, plan, run, printStep} from './core.mjs';
 import {inspect} from './status.mjs';
 import {backup} from './backup.mjs';
 import {SKILL_CATALOG, skillUrl, planSkill} from './skill-catalog.mjs';
+import {PONYTAIL_SKILLS, ponytailCommand} from './ponytail.mjs';
 
-const VERSION='0.5.3';
+const VERSION='0.5.4';
 const args=process.argv.slice(2);
 const tty=!!(process.stdin.isTTY&&process.stdout.isTTY);
 const tint=(s,n)=>tty?'\x1b['+n+'m'+s+'\x1b[0m':s;
@@ -36,6 +37,7 @@ function header(title,subtitle=''){
 function detectionLabel(found){return found?good('✓ Đã nhận diện'):warn('○ Chưa tìm thấy');}
 function statusLabel(tool){
   if(tool.installed)return good('✓ Đã nhận diện cài đặt');
+  if(tool.registered)return warn('◐ Đã đăng ký plugin · cần kiểm tra 6 skill');
   if(tool.configured)return warn('◐ Đã bật theo config · Chưa xác minh cài');
   return warn('○ Chưa xác nhận cài đặt');
 }
@@ -45,6 +47,32 @@ function skillStatusText(state){
   if(state.claude.installed&&state.codex.installed)return good('✓ Đã cài (Claude + Codex)');
   return good(state.claude.installed?'✓ Đã cài (Claude)':'✓ Đã cài (Codex)');
 }
+
+function ponytailStatusLabel(status,agent) {
+  const detail=status[agent];
+  if(detail.available===status.total)return good('✓ '+detail.available+'/'+status.total+' tệp skill');
+  if(detail.available>0)return warn('◐ '+detail.available+'/'+status.total+' tệp skill');
+  if(detail.registered)return warn('◐ Đã đăng ký plugin · chưa thấy SKILL.md');
+  return warn('○ Chưa xác minh');
+}
+function printPonytailStatus(status) {
+  line(' Ponytail chứa 6 skill; cài 1 plugin cho mỗi agent.');
+  line(' Claude: '+ponytailStatusLabel(status,'claude')+
+    (status.claude.disabled?' · đang tắt trong config':''));
+  line(' Codex:  '+ponytailStatusLabel(status,'codex')+
+    (status.codex.registered&&!status.codex.enabled?' · đang tắt trong config':''));
+  line();
+  for(const skill of PONYTAIL_SKILLS) {
+    const st=status.skills[skill.id];
+    line(' '+strong(skill.id)+' — '+skill.about);
+    line('   Claude '+(st.claude?'✓':'○')+' '+ponytailCommand('claude',skill.id)+
+      '    Codex '+(st.codex?'✓':'○')+' '+ponytailCommand('codex',skill.id));
+  }
+  line('\n '+tint('✓ chỉ có nghĩa đã tìm thấy SKILL.md; không bảo đảm hook/agent đang chạy.',90));
+  line(' Cài trong mục 1 → chọn Ponytail + Claude/Codex → xác nhận.');
+  line(' Codex: sau cài mở /hooks và duyệt các hook đáng tin cậy; khởi động lại agent.');
+}
+
 function menuFooter(){line('\n '+accent('↑ ↓')+' Di chuyển  '+accent('Enter')+' Chọn  '+accent('Q')+' Thoát');}
 function doctor(){
   const s=inspect();
@@ -56,18 +84,20 @@ function doctor(){
     if(t.id==='headroom'&&status.uvRegistered&&!status.available)line('Headroom uv: installed; CLI not on PATH (uv tool update-shell).');
   }
   line('Configuration: '+(s.configs.claude.filePresent?'Claude settings found; ':'')+(s.configs.codex.filePresent?'Codex config found':''));
+  line('Ponytail skills (files): Claude '+s.ponytail.claude.available+'/6; Codex '+s.ponytail.codex.available+'/6. Use --ponytail for details.');
 }
+if(args.includes('--ponytail')){line('Ponytail Skills · Claude Code & Codex');printPonytailStatus(inspect().ponytail);process.exit(0);}
 if(args.includes('--version')){line(VERSION);process.exit(0);}
 if(args.includes('--help')){
   line('Bolt Token Saver '+VERSION+' — interactive token optimizer');
-  line('Usage: npx -y github:0xmarkhydra/bolt-token-saver [--doctor|--status|--plan|--help]');
+  line('Usage: npx -y github:0xmarkhydra/bolt-token-saver [--doctor|--status|--plan|--ponytail|--help]');
   line('Keyboard: ↑/↓ to move, Space to select, Enter to confirm, Esc to go back.');
   process.exit(0);
 }
 if(args.includes('--doctor')||args.includes('--status')){doctor();process.exit(0);}
 if(args.includes('--plan')){
   doctor();
-  const p=plan({agents:[...selectedAgents],tools:[...selectedTools],system});
+  const p=plan({agents:[...selectedAgents],tools:[...selectedTools],system,ponytailStatus:inspect().ponytail});
   line('\nPreview only (no changes):');
   p.steps.forEach((s,i)=>line((i+1)+'. '+printStep(s)));
   p.warnings.forEach(w=>line('NOTE: '+w));
@@ -155,9 +185,10 @@ async function dashboard(){
   const options=[
     {id:'setup',name:'1. Cài đặt tối ưu token',description:'Được hướng dẫn chọn Claude/Codex và công cụ phù hợp'},
     {id:'catalog',name:'2. Khám phá & cài thêm AI Skills',description:'10 dự án nổi bật — chỉ cài khi bạn chọn'},
-    {id:'config',name:'3. Xem trạng thái & cấu hình',description:'Chỉ xem; tự động ẩn khóa API và endpoint'},
-    {id:'help',name:'4. Hướng dẫn sử dụng',description:'Phím bấm, quyền truy cập và cách chạy AI'},
-    {id:'quit',name:'5. Thoát'}
+    {id:'ponytail',name:'3. Ponytail Skills · Claude / Codex',description:'Kiểm tra 6 skill và xem lệnh gọi riêng từng agent'},
+    {id:'config',name:'4. Xem trạng thái & cấu hình',description:'Chỉ xem; tự động ẩn khóa API và endpoint'},
+    {id:'help',name:'5. Hướng dẫn sử dụng',description:'Phím bấm, quyền truy cập và cách chạy AI'},
+    {id:'quit',name:'6. Thoát'}
   ];
   let cursor=0;
   const render=()=>{
@@ -177,7 +208,9 @@ async function dashboard(){
         line('   '+skill.name.padEnd(19)+' '+skillStatusText(s.skillStates[skill.id]));
       if(installedSkills.length>4)line('   ... và '+(installedSkills.length-4)+' skill khác (xem mục 2)');
     }
-    line('\n '+strong('BẠN MUỐN LÀM GÌ?'));
+    line('\n '+strong('PONYTAIL · 6 SKILLS (tệp được tìm thấy)'));
+    line('   Claude '+s.ponytail.claude.available+'/6  ·  Codex '+s.ponytail.codex.available+'/6');
+    line('\n '+strong('BẠN MUỐN LÀM GÌ?'))
     options.forEach((o,i)=>{
       line(' '+(i===cursor?accent('❯'):' ')+' '+(i===cursor?strong(o.name):o.name));
       if(i===cursor)line('     '+tint(o.description,90));
@@ -190,8 +223,13 @@ async function dashboard(){
     else if(key.name==='down'||str==='j'){cursor=(cursor+1)%options.length;render();}
     else if(key.name==='return')finish(options[cursor].id);
     else if(key.name==='escape'||str==='q'||str==='Q')finish('quit');
-    else if('12345'.includes(str)&&str?.length===1)finish(options[Number(str)-1].id);
+    else if('123456'.includes(str)&&str?.length===1)finish(options[Number(str)-1].id);
   });
+}
+async function ponytailScreen(){
+  clear();header('PONYTAIL · CLAUDE CODE + CODEX','Chi tiết các skill; chỉ đọc, không tự cài');
+  printPonytailStatus(inspect().ponytail);
+  return waitBack();
 }
 async function configScreen(){
   const s=inspect();
@@ -223,7 +261,9 @@ async function configScreen(){
     line('   '+t.name.padEnd(13)+statusLabel(tool));
     if(t.id==='headroom')line('      '+tint(tool.details,90));
   }
-  line('\n '+strong(' AI SKILLS MỞ RỘNG'));
+  line('\n '+strong(' PONYTAIL · 6 SKILLS'));
+  line('   Claude: '+s.ponytail.claude.available+'/6 · Codex: '+s.ponytail.codex.available+'/6 · chi tiết ở mục 3');
+  line('\n '+strong(' AI SKILLS MỞ RỘNG'))
   for(const skill of SKILL_CATALOG.filter(x=>x.type!=='core'&&x.type!=='collection')){
     line('   '+skill.name.padEnd(19)+skillStatusText(s.skillStates[skill.id]));
   }
@@ -240,7 +280,9 @@ async function helpScreen(){
     ' 4. Xem bản tóm tắt; nhấn D để xem các lệnh chi tiết.',
     ' 5. Chỉ khi đồng ý, chương trình mới tải/cài các công cụ.',
     ' 6. Khởi động lại Claude/Codex sau khi cài.',
-    ' 7. Mục AI Skills là công cụ mở rộng, KHÔNG tự tiết kiệm token.',
+    ' 7. Mục Ponytail Skills: 6 skill dùng được với Claude/Codex khi plugin đã cài.',
+    '    Claude: /ponytail-review · Codex: $ponytail:ponytail-review.',
+    ' 8. Mục AI Skills là công cụ mở rộng, KHÔNG tự tiết kiệm token.',
     '    Superpowers, UI/UX, Graphify, Addy Skills và các skill khác là tùy chọn.',
     '',
     ' PHÍM BẤM',
@@ -314,6 +356,11 @@ async function installScreen(p,{agentIds=[...selectedAgents],showHeadroom=true,s
   if(showHeadroom&&selectedTools.has('headroom')){
     line(' Headroom: dùng BOLT-CLAUDE / BOLT-CODEX launcher thay vì chạy agent trực tiếp.');
   }
+  if(p.steps.some(s=>s.name.startsWith('Ponytail'))){
+    const observed=inspect().ponytail;
+    line(' Ponytail: Claude '+observed.claude.available+'/6 · Codex '+observed.codex.available+'/6 tệp skill được tìm thấy.');
+    line(' Chưa đủ 6/6? Khởi động lại agent, xem /plugin (Claude) hoặc /plugins (Codex).');
+  }
   if(skillId){
     const observed=inspect().skillStates[skillId];
     line('\n '+strong('KIỂM TRA SAU CÀI'));
@@ -344,7 +391,7 @@ async function setupWizard(){
       });
       if(b==='quit')return 'quit';
       if(b==='back')break;
-      const p=plan({system:s,agents:[...selectedAgents],tools:[...selectedTools]});
+      const p=plan({system:s,agents:[...selectedAgents],tools:[...selectedTools],ponytailStatus:inspect().ponytail});
       const c=await confirmSetup(p);
       if(c==='quit')return 'quit';
       if(c==='back')continue;
@@ -450,6 +497,7 @@ async function main(){
       if(action==='quit')break;
       const result=action==='setup'?await setupWizard()
         :action==='catalog'?await skillCatalogScreen()
+        :action==='ponytail'?await ponytailScreen()
         :action==='config'?await configScreen():await helpScreen();
       if(result==='quit')break;
     }
