@@ -11,6 +11,12 @@ When a user sends the repo URL with "install/setup this for me", treat it as an 
 
 If the user instead asks you to **develop the installer**, follow [AGENTS.md](AGENTS.md). These are two different tasks.
 
+### Ponytail (Claude Code + Codex)
+
+Ponytail là **một plugin chứa sáu skill**, không phải sáu package cài riêng. Nếu người dùng chọn cả Claude và Codex, cài plugin chính thức độc lập cho từng agent đã chọn. Không tự cài Codex chỉ vì Claude đã có Ponytail hoặc ngược lại.
+
+Sau cài, chạy `node src/cli.mjs --ponytail` (chỉ đọc) để kiểm tra từng `SKILL.md`. Chỉ báo `6/6` khi cả sáu file được tìm thấy ở vị trí được hỗ trợ; đăng ký plugin, cài đủ tệp, kích hoạt hook và dùng được trong AI là **bốn trạng thái khác nhau**. Hướng dẫn khởi động lại mỗi agent và, với Codex, xem `/hooks` trước khi tin cậy. Lệnh gọi: Claude `/ponytail-audit`; Codex `$ponytail:ponytail-audit`. Không báo phần trăm tiết kiệm token của người dùng dựa trên benchmark Ponytail.
+
 ### Optional AI skills from the top-10 image
 
 If the user also requests Superpowers, UI UX Pro Max, Graphify, Addy Osmani Skills, Understand Anything, Archify or Impeccable, first consult [docs/SKILL-CATALOG.md](docs/SKILL-CATALOG.md). The TUI has a separate, opt-in **AI Skills** menu. Do **not** install every skill just because it is popular or claim every skill reduces tokens. Some skills are manual-only for Codex and may be expensive to run on large repositories.

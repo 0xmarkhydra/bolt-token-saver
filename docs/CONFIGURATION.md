@@ -1,6 +1,6 @@
 # Config discovery and privacy rules
 
-This document describes the **implemented v0.5.3** read-only configuration screen. Optional skills from [SKILL-CATALOG.md](SKILL-CATALOG.md) are not yet auto-detected as installed/enabled/working. It does **not** claim that tools are functioning end-to-end.
+This document describes the **implemented v0.5.4** read-only configuration screen. Optional skills from [SKILL-CATALOG.md](SKILL-CATALOG.md) use limited plugin/skill heuristics; **Ponytail** additionally checks its six exact bundled `SKILL.md` files for Claude and Codex separately. It does **not** claim that tools are functioning end-to-end.
 
 ## Sources inspected
 
@@ -13,7 +13,7 @@ Headroom detection also runs a bounded, read-only `uv tool list` when uv is avai
 
 Caveman and Ponytail detection distinguish actual plugin/skill file evidence from an `enabledPlugins` configuration flag. A flag by itself is **configured only**: it must not be reported as a verified installation.
 
-The tool also checks the known skill paths `~/.codex/skills/<tool>/SKILL.md` and `~/.agents/skills/<tool>/SKILL.md`. Presence is **not equivalent to active support**.
+For Ponytail, the reader checks bounded Claude/Codex plugin-cache directories, Claude registry `installPath` values, and six specific bundled skill names; it reports an independent `0/6`–`6/6` count for each agent. A cached skill file does not prove the plugin is enabled or active. Registration in Claude's `installed_plugins.json` and the `[plugins.\"ponytail@ponytail\"]` Codex config section are reported separately. Only metadata is returned, never the local paths.\n\nThe tool also checks the known skill paths `~/.codex/skills/<tool>/SKILL.md` and `~/.agents/skills/<tool>/SKILL.md`. Presence is **not equivalent to active support**.
 
 ## Data never displayed
 

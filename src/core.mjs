@@ -37,7 +37,7 @@ export function detect(){
   return { os:({win32:'Windows',darwin:'macOS',linux:'Linux'})[process.platform]||process.platform,platform:process.platform,arch:process.arch,found };
 }
 const step=(name,cmd,args,opts={})=>({name,cmd,args,...opts});
-export function plan({agents,tools,system=detect()}){
+export function plan({agents,tools,system=detect(),ponytailStatus=null}){
   if(!agents.length||!tools.length)throw Error('Select at least one agent and one optimization');
   for(const a of agents)if(!AGENTS.some(x=>x.id===a))throw Error('Unsupported agent: '+a);
   for(const t of tools)if(!TOOLS.some(x=>x.id===t))throw Error('Unsupported optimization: '+t);
@@ -89,14 +89,23 @@ export function plan({agents,tools,system=detect()}){
   }
   if(tools.includes('ponytail')){
     if(agents.includes('claude')){
-      steps.push(step('Ponytail marketplace','claude',['plugin','marketplace','add','DietrichGebert/ponytail'],{needs:['claude'],optional:true}));
-      steps.push(step('Ponytail for Claude','claude',['plugin','install','ponytail@ponytail'],{needs:['claude']}));
+      if(ponytailStatus?.claude?.registered){
+        warnings.push('Ponytail đã đăng ký trên Claude: bỏ qua cài trùng; nếu thiếu skill hoặc đang tắt, kiểm tra /plugin.');
+      }else{
+        steps.push(step('Ponytail marketplace','claude',['plugin','marketplace','add','DietrichGebert/ponytail'],{needs:['claude'],optional:true}));
+        steps.push(step('Ponytail for Claude (6 skills)','claude',['plugin','install','ponytail@ponytail'],{needs:['claude']}));
+      }
     }
     if(agents.includes('codex')){
-      steps.push(step('Ponytail marketplace Codex','codex',['plugin','marketplace','add','DietrichGebert/ponytail'],{needs:['codex'],optional:true}));
-      steps.push(step('Ponytail for Codex','codex',['plugin','add','ponytail@ponytail'],{needs:['codex']}));
-      warnings.push('In Codex, inspect /hooks and trust Ponytail hooks.');
+      if(ponytailStatus?.codex?.registered){
+        warnings.push('Ponytail đã đăng ký trên Codex: bỏ qua cài trùng; nếu thiếu skill hoặc đang tắt, kiểm tra /plugins.');
+      }else{
+        steps.push(step('Ponytail marketplace Codex','codex',['plugin','marketplace','add','DietrichGebert/ponytail'],{needs:['codex'],optional:true}));
+        steps.push(step('Ponytail for Codex (6 skills)','codex',['plugin','add','ponytail@ponytail'],{needs:['codex']}));
+      }
+      warnings.push('Codex: mở /hooks, xem và tin cậy hai lifecycle hook Ponytail nếu muốn dùng cơ chế luôn bật.');
     }
+    warnings.push('Ponytail gói 6 skill cùng plugin; sau khi cài, khởi động lại agent và xác minh từng skill.');
   }
   return {steps,warnings};
 }
